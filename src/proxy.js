@@ -77,10 +77,12 @@ class ProxyServer {
 
   handleHttpsRequest(req, clientSocket, head, host, port) {
     const serverSocket = net.connect(port, host, () => {
-      clientSocket.write(
-        "HTTP/1.1 200 Connection Established\r\n" +
-          "Proxy-agent: Node.js-Proxy\r\n\r\n"
-      );
+      if (!clientSocket.destroyed && clientSocket.writable) {
+        clientSocket.write(
+          "HTTP/1.1 200 Connection Established\r\n" +
+            "Proxy-agent: Node.js-Proxy\r\n\r\n"
+        );
+      }
       serverSocket.write(head);
       serverSocket.pipe(clientSocket);
       clientSocket.pipe(serverSocket);
@@ -88,7 +90,30 @@ class ProxyServer {
 
     serverSocket.on("error", (err) => {
       console.log(`Error in HTTPS connection: ${err.message}`);
-      clientSocket.end();
+      if (!clientSocket.destroyed) {
+        clientSocket.end();
+      }
+    });
+
+    clientSocket.on("error", (err) => {
+      console.log(`Error in client socket: ${err.message}`);
+      if (!serverSocket.destroyed) {
+        serverSocket.end();
+      }
+    });
+
+    clientSocket.on("close", () => {
+      console.log("Client socket closed");
+      if (!serverSocket.destroyed) {
+        serverSocket.end();
+      }
+    });
+
+    serverSocket.on("close", () => {
+      console.log("Server socket closed");
+      if (!clientSocket.destroyed) {
+        clientSocket.end();
+      }
     });
   }
 }

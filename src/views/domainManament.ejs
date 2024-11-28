@@ -65,7 +65,7 @@
               >
                 <span><%= item.domainName %></span>
                 <label class="switch">
-                  <input type="checkbox" checked />
+                  <input type="checkbox" checked data-set="<%= item.id %>" />
                   <span class="slider round"></span>
                 </label>
               </li>
@@ -78,16 +78,12 @@
             </h2>
             <ul class="space-y-3">
               <li class="bg-gray-100 p-3 rounded-xl">example4.com</li>
-              <li class="bg-gray-100 p-3 rounded-xl">example5.com</li>
-              <li class="bg-gray-100 p-3 rounded-xl">example6.com</li>
             </ul>
           </div>
           <div id="blocked" class="tab-content hidden">
             <h2 class="text-xl font-semibold mb-4">Domain bị chặn</h2>
             <ul class="space-y-3">
               <li class="bg-gray-100 p-3 rounded-xl">example7.com</li>
-              <li class="bg-gray-100 p-3 rounded-xl">example8.com</li>
-              <li class="bg-gray-100 p-3 rounded-xl">example9.com</li>
             </ul>
           </div>
         </div>
@@ -119,17 +115,38 @@
         .querySelectorAll(".switch input")
         .forEach(function (switchInput) {
           switchInput.addEventListener("change", function () {
+            const dataId = this.dataset.set;
             if (this.checked) {
+              updateDomainStatus(dataId, true);
               this.parentElement.querySelector(
                 ".slider"
               ).style.backgroundColor = "#22c55e";
+              console.log(this.checked);
             } else {
+              updateDomainStatus(dataId, false);
               this.parentElement.querySelector(
                 ".slider"
               ).style.backgroundColor = "#ef4444";
             }
           });
         });
+
+      function updateDomainStatus(domainId, newStatus) {
+        fetch(`/updateDomain/${domainId}`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ status: newStatus }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            console.log("Cập nhật trạng thái thành công", data);
+          })
+          .catch((error) => {
+            console.error("Lỗi khi cập nhật trạng thái", error);
+          });
+      }
 
       // Xử lý chuyển đổi tab
       document.querySelectorAll(".tab-btn").forEach(function (btn) {

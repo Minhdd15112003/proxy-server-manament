@@ -6,9 +6,7 @@ var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 var mongoose = require("mongoose");
 const { ProxyServer } = require("./proxy");
-var net = require("net");
 var domainModal = require("./model/domain.model");
-const { hostname } = require("os");
 
 var app = express();
 var server = http.createServer(app);
@@ -23,7 +21,7 @@ app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, "../public")));
 
 app.get("/", (req, res) => {
   domainModal.find().then((data) => {
@@ -31,15 +29,44 @@ app.get("/", (req, res) => {
   });
 });
 
-app.get("/domain/:id", (req, res) => {
+app.get("/domain/:id", async (req, res) => {
   domainModal
     .findById(req.params.id)
     .then((data) => {
-      res.render("domainManament", { data: data.domain });
+      const trueDomains = data.domain.filter(
+        (domain) => domain.statusDomain === true
+      );
+      const falseDomains = data.domain.filter(
+        (domain) => domain.statusDomain === false
+      );
+      console.log(falseDomains);
+      res.render("domainManament", {
+        data: data.domain,
+        trueDomains,
+        falseDomains,
+      });
     })
     .catch((err) => {
       console.error("Lỗi khi lấy dữ liệu:", err);
       res.status(500).json({ message: "Không thể lấy dữ liệu" });
+    });
+});
+
+app.patch("/updateDomain/:id", async (req, res) => {
+  await domainModal
+    .updateOne(
+      { "domain._id": req.params.id },
+      {
+        $set: { "domain.$.statusDomain": false }, // Cập nhật statusDomain của domain đó
+      },
+      { new: true }
+    )
+    .then((data) => {
+      res.json("Cập nhật trạng thái thành công");
+    })
+    .catch((err) => {
+      console.error("Lỗi khi cập nhật trạng thái:", err);
+      res.status(500).json({ message: "Cập nhật không thành công" });
     });
 });
 
