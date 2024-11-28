@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quản lý Domain</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/stylesheets/custom-switch.css" />
+  </head>
+  <body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+      <h1 class="text-3xl font-bold mb-6 text-center">Quản lý Domain</h1>
+
+      <div class="mb-6 flex justify-center space-x-8">
+        <label class="inline-flex items-center">
+          <input
+            type="radio"
+            name="domainControl"
+            id="allowAllRadio"
+            class="form-radio h-5 w-5 text-green-600"
+          />
+          <span class="ml-2 text-gray-700"
+            >Cho phép tất cả domain hoạt động</span
+          >
+        </label>
+        <label class="inline-flex items-center">
+          <input
+            type="radio"
+            name="domainControl"
+            id="blockAllRadio"
+            class="form-radio h-5 w-5 text-red-600"
+          />
+          <span class="ml-2 text-gray-700">Chặn tất cả domain</span>
+        </label>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow-md overflow-hidden">
+        <div class="flex">
+          <button
+            class="tab-btn py-3 px-6 w-1/3 font-semibold text-gray-700 bg-gray-200 hover:bg-gray-300 focus:outline-none rounded-tl-2xl"
+            data-tab="active"
+          >
+            Domain đang hoạt động
+          </button>
+          <button
+            class="tab-btn py-3 px-6 w-1/3 font-semibold text-gray-700 bg-gray-200 hover:bg-gray-300 focus:outline-none"
+            data-tab="allowed"
+          >
+            Domain cho phép hoạt động
+          </button>
+          <button
+            class="tab-btn py-3 px-6 w-1/3 font-semibold text-gray-700 bg-gray-200 hover:bg-gray-300 focus:outline-none rounded-tr-2xl"
+            data-tab="blocked"
+          >
+            Domain bị chặn
+          </button>
+        </div>
+        <div class="p-6">
+          <div id="active" class="tab-content">
+            <h2 class="text-xl font-semibold mb-4">Domain đang hoạt động</h2>
+            <ul class="space-y-3">
+              <% data.forEach(item => { %>
+              <li
+                class="bg-gray-100 p-3 rounded-xl flex justify-between items-center"
+              >
+                <span><%= item.domainName %></span>
+                <label class="switch">
+                  <input type="checkbox" checked />
+                  <span class="slider round"></span>
+                </label>
+              </li>
+              <% }) %>
+            </ul>
+          </div>
+          <div id="allowed" class="tab-content hidden">
+            <h2 class="text-xl font-semibold mb-4">
+              Domain cho phép hoạt động
+            </h2>
+            <ul class="space-y-3">
+              <li class="bg-gray-100 p-3 rounded-xl">example4.com</li>
+              <li class="bg-gray-100 p-3 rounded-xl">example5.com</li>
+              <li class="bg-gray-100 p-3 rounded-xl">example6.com</li>
+            </ul>
+          </div>
+          <div id="blocked" class="tab-content hidden">
+            <h2 class="text-xl font-semibold mb-4">Domain bị chặn</h2>
+            <ul class="space-y-3">
+              <li class="bg-gray-100 p-3 rounded-xl">example7.com</li>
+              <li class="bg-gray-100 p-3 rounded-xl">example8.com</li>
+              <li class="bg-gray-100 p-3 rounded-xl">example9.com</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Xử lý sự kiện cho các radio button chính
+      document
+        .getElementById("allowAllRadio")
+        .addEventListener("change", function () {
+          if (this.checked) {
+            console.log("Cho phép tất cả domain hoạt động");
+            // Thêm logic để cho phép tất cả domain hoạt động
+          }
+        });
+
+      document
+        .getElementById("blockAllRadio")
+        .addEventListener("change", function () {
+          if (this.checked) {
+            console.log("Chặn tất cả domain");
+            // Thêm logic để chặn tất cả domain
+          }
+        });
+
+      // Xử lý sự kiện cho các công tắc
+      document
+        .querySelectorAll(".switch input")
+        .forEach(function (switchInput) {
+          switchInput.addEventListener("change", function () {
+            if (this.checked) {
+              this.parentElement.querySelector(
+                ".slider"
+              ).style.backgroundColor = "#22c55e";
+            } else {
+              this.parentElement.querySelector(
+                ".slider"
+              ).style.backgroundColor = "#ef4444";
+            }
+          });
+        });
+
+      // Xử lý chuyển đổi tab
+      document.querySelectorAll(".tab-btn").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          // Ẩn tất cả các tab content
+          document.querySelectorAll(".tab-content").forEach(function (content) {
+            content.classList.add("hidden");
+          });
+
+          // Hiển thị tab content được chọn
+          document.getElementById(this.dataset.tab).classList.remove("hidden");
+
+          // Cập nhật trạng thái active của các nút tab
+          document.querySelectorAll(".tab-btn").forEach(function (btn) {
+            btn.classList.remove("bg-white", "border-b-2", "border-blue-500");
+            btn.classList.add("bg-gray-200");
+          });
+          this.classList.remove("bg-gray-200");
+          this.classList.add("bg-white", "border-b-2", "border-blue-500");
+        });
+      });
+
+      // Kích hoạt tab đầu tiên khi trang được tải
+      document.querySelector(".tab-btn").click();
+    </script>
+  </body>
+</html>
