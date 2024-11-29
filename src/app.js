@@ -39,7 +39,6 @@ app.get("/domain/:id", async (req, res) => {
       const falseDomains = data.domain.filter(
         (domain) => domain.statusDomain === false
       );
-      console.log(falseDomains);
       res.render("domainManament", {
         data: data.domain,
         trueDomains,
@@ -53,23 +52,24 @@ app.get("/domain/:id", async (req, res) => {
 });
 
 app.patch("/updateDomain/:id", async (req, res) => {
+  const newStatus = req.body.status; // lấy giá trị boolean từ body
+
   await domainModal
     .updateOne(
       { "domain._id": req.params.id },
       {
-        $set: { "domain.$.statusDomain": false }, // Cập nhật statusDomain của domain đó
+        $set: { "domain.$.statusDomain": newStatus }, // Cập nhật statusDomain với giá trị boolean
       },
       { new: true }
     )
     .then((data) => {
-      res.json("Cập nhật trạng thái thành công");
+      res.json({ message: "Cập nhật trạng thái thành công", data });
     })
     .catch((err) => {
       console.error("Lỗi khi cập nhật trạng thái:", err);
       res.status(500).json({ message: "Cập nhật không thành công" });
     });
 });
-
 app.patch("/update/:id", (req, res) => {
   domainModal
     .findByIdAndUpdate(

@@ -64,10 +64,16 @@
                 class="bg-gray-100 p-3 rounded-xl flex justify-between items-center"
               >
                 <span><%= item.domainName %></span>
-                <label class="switch">
-                  <input type="checkbox" checked data-set="<%= item.id %>" />
+                <!-- <label class="switch">
+                  <input
+                    type="checkbox"
+                    checked
+                    data-set="<%= item.id %>"
+                    status-set="<%= item.statusDomain %>"
+                  />
+
                   <span class="slider round"></span>
-                </label>
+                </label> -->
               </li>
               <% }) %>
             </ul>
@@ -77,13 +83,58 @@
               Domain cho phép hoạt động
             </h2>
             <ul class="space-y-3">
-              <li class="bg-gray-100 p-3 rounded-xl">example4.com</li>
+              <% trueDomains.forEach(item => { %>
+              <li
+                class="bg-gray-100 p-3 rounded-xl flex justify-between items-center"
+              >
+                <span><%= item.domainName %></span>
+                <button
+                  onclick="handleBlock('<%= item.id %>')"
+                  class="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 focus:outline-none"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-4 w-4"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                </button>
+              </li>
+
+              <% }) %>
             </ul>
           </div>
           <div id="blocked" class="tab-content hidden">
             <h2 class="text-xl font-semibold mb-4">Domain bị chặn</h2>
             <ul class="space-y-3">
-              <li class="bg-gray-100 p-3 rounded-xl">example7.com</li>
+              <% falseDomains.forEach(item => { %>
+              <li
+                class="bg-gray-100 p-3 rounded-xl flex justify-between items-center"
+              >
+                <span><%= item.domainName %></span>
+                <button
+                  onclick="handleUnblock('<%= item.id %>')"
+                  class="p-2 bg-green-500 text-white rounded-full hover:bg-green-600 focus:outline-none"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-4 w-4"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      d="M10 2a5 5 0 00-5 5v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2H7V7a3 3 0 015.905-.75 1 1 0 001.937-.5A5.002 5.002 0 0010 2z"
+                    />
+                  </svg>
+                </button>
+              </li>
+              <% }) %>
             </ul>
           </div>
         </div>
@@ -110,27 +161,6 @@
           }
         });
 
-      // Xử lý sự kiện cho các công tắc
-      document
-        .querySelectorAll(".switch input")
-        .forEach(function (switchInput) {
-          switchInput.addEventListener("change", function () {
-            const dataId = this.dataset.set;
-            if (this.checked) {
-              updateDomainStatus(dataId, true);
-              this.parentElement.querySelector(
-                ".slider"
-              ).style.backgroundColor = "#22c55e";
-              console.log(this.checked);
-            } else {
-              updateDomainStatus(dataId, false);
-              this.parentElement.querySelector(
-                ".slider"
-              ).style.backgroundColor = "#ef4444";
-            }
-          });
-        });
-
       function updateDomainStatus(domainId, newStatus) {
         fetch(`/updateDomain/${domainId}`, {
           method: "PATCH",
@@ -148,10 +178,11 @@
           });
       }
 
-      // Xử lý chuyển đổi tab
+      // ------------------------------------Xử lý chuyển đổi tab------------------------------------
       document.querySelectorAll(".tab-btn").forEach(function (btn) {
         btn.addEventListener("click", function () {
           // Ẩn tất cả các tab content
+
           document.querySelectorAll(".tab-content").forEach(function (content) {
             content.classList.add("hidden");
           });
@@ -171,6 +202,41 @@
 
       // Kích hoạt tab đầu tiên khi trang được tải
       document.querySelector(".tab-btn").click();
+
+      // ------------------------comment-----------------------------
+
+      // Xử lý trạng thái status
+      // document.addEventListener("DOMContentLoaded", function () {
+      //   document
+      //     .querySelectorAll('.switch input[type="checkbox"]')
+      //     .forEach(function (switchInput) {
+      //       const status = switchInput.getAttribute("status-set") === "true";
+      //       switchInput.checked = status;
+      //       const sliderColor = status ? "#22c55e" : "#ef4444";
+      //       switchInput.nextElementSibling.style.backgroundColor = sliderColor;
+      //     });
+      // });
+
+      // Xử lý sự kiện cho các switch button
+      // document
+      //   .querySelectorAll(".switch input")
+      //   .forEach(function (switchInput) {
+      //     switchInput.addEventListener("change", function () {
+      //       const dataId = this.dataset.set;
+      //       const newStatus = this.checked; // lấy giá trị boolean
+
+      //       // Gửi yêu cầu PATCH với giá trị boolean
+      //       updateDomainStatus(dataId, newStatus);
+
+      //       // Cập nhật màu sắc của slider
+      //       this.parentElement.querySelector(".slider").style.backgroundColor =
+      //         newStatus ? "#22c55e" : "#ef4444";
+
+      //       setInterval(() => {
+      //         location.reload();
+      //       }, 500);
+      //     });
+      //   });
     </script>
   </body>
 </html>

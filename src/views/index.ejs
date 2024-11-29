@@ -111,7 +111,7 @@
         }
       }
 
-      function updateDomainStatus(domainId, newStatus) {
+      function updateIpStatus(domainId, newStatus) {
         fetch(`/update/${domainId}`, {
           method: "PATCH",
           headers: {
@@ -142,7 +142,7 @@
 
           statusElement.textContent = "Cho phép";
           updateButtonStyle(btn, true);
-          updateDomainStatus(domainId, true);
+          updateIpStatus(domainId, true);
         });
       });
 
@@ -154,7 +154,7 @@
 
           statusElement.textContent = "Chặn";
           updateButtonStyle(btn, false);
-          updateDomainStatus(domainId, false);
+          updateIpStatus(domainId, false);
         });
       });
 
@@ -169,7 +169,7 @@
           statusElement.textContent = newStatus ? "Cho phép" : "Chặn";
           updateButtonStyle(this, newStatus);
           this.dataset.status = newStatus.toString();
-          updateDomainStatus(domainId, newStatus);
+          updateIpStatus(domainId, newStatus);
         });
       });
     </script>
