@@ -112,7 +112,7 @@
       }
 
       function updateIpStatus(domainId, newStatus) {
-        fetch(`/update/${domainId}`, {
+        fetch(`/updateIp/${domainId}`, {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",

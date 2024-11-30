@@ -7,6 +7,7 @@ var logger = require("morgan");
 var mongoose = require("mongoose");
 const { ProxyServer } = require("./proxy");
 var domainModal = require("./model/domain.model");
+const routes = require("./routes");
 
 var app = express();
 var server = http.createServer(app);
@@ -23,68 +24,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "../public")));
 
-app.get("/", (req, res) => {
-  domainModal.find().then((data) => {
-    res.render("index", { data: data });
-  });
-});
-
-app.get("/domain/:id", async (req, res) => {
-  domainModal
-    .findById(req.params.id)
-    .then((data) => {
-      const trueDomains = data.domain.filter(
-        (domain) => domain.statusDomain === true
-      );
-      const falseDomains = data.domain.filter(
-        (domain) => domain.statusDomain === false
-      );
-      res.render("domainManament", {
-        data: data.domain,
-        trueDomains,
-        falseDomains,
-      });
-    })
-    .catch((err) => {
-      console.error("Lỗi khi lấy dữ liệu:", err);
-      res.status(500).json({ message: "Không thể lấy dữ liệu" });
-    });
-});
-
-app.patch("/updateDomain/:id", async (req, res) => {
-  const newStatus = req.body.status; // lấy giá trị boolean từ body
-
-  await domainModal
-    .updateOne(
-      { "domain._id": req.params.id },
-      {
-        $set: { "domain.$.statusDomain": newStatus }, // Cập nhật statusDomain với giá trị boolean
-      },
-      { new: true }
-    )
-    .then((data) => {
-      res.json({ message: "Cập nhật trạng thái thành công", data });
-    })
-    .catch((err) => {
-      console.error("Lỗi khi cập nhật trạng thái:", err);
-      res.status(500).json({ message: "Cập nhật không thành công" });
-    });
-});
-app.patch("/update/:id", (req, res) => {
-  domainModal
-    .findByIdAndUpdate(
-      req.params.id,
-      { status: req.body.status },
-      { new: true }
-    )
-    .then((data) => {
-      res.json({ status: data.status });
-    })
-    .catch((err) => {
-      console.error("Lỗi khi cập nhật trạng thái:", err);
-      res.status(500).json({ message: "Cập nhật không thành công" });
-    });
-});
+routes(app);
 
 // Kết nối MongoDB
 mongoose

@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quản lý proxy</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/stylesheets/custom-switch.css" />
+    <link
+      href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+      <h1 class="text-3xl font-bold mb-6 text-center">Quản lý Proxy</h1>
+
+      <div class="mb-6 flex justify-center space-x-8">
+        <label class="inline-flex items-center">
+          <input
+            type="radio"
+            name="domainControl"
+            id="allowAllRadio"
+            class="form-radio h-5 w-5 text-green-600"
+          />
+          <span class="ml-2 text-gray-700"
+            >Cho phép tất cả domain hoạt động</span
+          >
+        </label>
+        <label class="inline-flex items-center">
+          <input
+            type="radio"
+            name="domainControl"
+            id="blockAllRadio"
+            class="form-radio h-5 w-5 text-red-600"
+          />
+          <span class="ml-2 text-gray-700">Chặn tất cả domain</span>
+        </label>
+
+        <button
+          id="blockAllBtn"
+          class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500"
+        >
+          <a href="/trash"> Thùng rác</a>
+          <i class="bx bx-trash"></i>
+        </button>
+      </div>
+
+      <div class="mb-4">
+        <input
+          type="text"
+          id="searchInput"
+          placeholder="Tìm kiếm domain..."
+          class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+
+      <!-- New domain input and buttons -->
+      <div class="mb-6 flex space-x-2">
+        <input
+          type="text"
+          id="domainInput"
+          placeholder="Nhập domain..."
+          class="flex-grow px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <button
+          id="blockDomainBtn"
+          class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500"
+        >
+          Block
+        </button>
+        <button
+          id="acceptDomainBtn"
+          class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
+        >
+          Accept
+        </button>
+        <button
+          id="trashDomainBtn"
+          class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500"
+        >
+          Trash
+        </button>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow-md overflow-hidden">
+        <div class="flex">
+          <button
+            class="tab-btn py-3 px-6 w-1/3 font-semibold text-gray-700 bg-gray-200 hover:bg-gray-300 focus:outline-none rounded-tl-2xl"
+            data-tab="active"
+          >
+            Domain đang hoạt động
+          </button>
+          <button
+            class="tab-btn py-3 px-6 w-1/3 font-semibold text-gray-700 bg-gray-200 hover:bg-gray-300 focus:outline-none"
+            data-tab="allowed"
+          >
+            Domain cho phép hoạt động
+          </button>
+          <button
+            class="tab-btn py-3 px-6 w-1/3 font-semibold text-gray-700 bg-gray-200 hover:bg-gray-300 focus:outline-none rounded-tr-2xl"
+            data-tab="blocked"
+          >
+            Domain bị chặn
+          </button>
+        </div>
+        <div class="p-6">
+          <div id="active" class="tab-content">
+            <h2 class="text-xl font-semibold mb-4">Domain đang hoạt động</h2>
+            <ul class="space-y-3" id="active-list">
+              <% data.forEach(item => { %>
+              <li
+                class="bg-gray-100 p-3 rounded-xl flex justify-between items-center"
+                ,
+                data-id="<%= item.id %>"
+              >
+                <span class="hover:text-blue-500 focus:outline-none"
+                  ><a href="https://<%= item.domainName %>"
+                    ><%= item.domainName %></a
+                  ></span
+                >
+              </li>
+              <% }) %>
+            </ul>
+          </div>
+          <div id="allowed" class="tab-content hidden">
+            <h2 class="text-xl font-semibold mb-4">
+              Domain cho phép hoạt động
+            </h2>
+            <ul class="space-y-3" id="allowed-list">
+              <% trueDomains.forEach(item => { %>
+              <li
+                class="bg-gray-100 p-3 rounded-xl flex justify-between items-center"
+                data-id="<%= item.id %>"
+              >
+                <span class="hover:text-blue-500 focus:outline-none"
+                  ><a href="https://<%= item.domainName %>"
+                    ><%= item.domainName %></a
+                  ></span
+                >
+                <button
+                  onclick="handleBlock('<%= item.id %>')"
+                  class="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 focus:outline-none"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-4 w-4"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                </button>
+              </li>
+              <% }) %>
+            </ul>
+          </div>
+          <div id="blocked" class="tab-content hidden">
+            <h2 class="text-xl font-semibold mb-4">Domain bị chặn</h2>
+            <ul class="space-y-3" id="blocked-list">
+              <% falseDomains.forEach(item => { %>
+              <li
+                class="bg-gray-100 p-3 rounded-xl flex justify-between items-center"
+                data-id="<%= item.id %>"
+              >
+                <span class="hover:text-blue-500 focus:outline-none"
+                  ><a href="https://<%= item.domainName %>"
+                    ><%= item.domainName %></a
+                  ></span
+                >
+                <button
+                  onclick="handleUnblock('<%= item.id %>')"
+                  class="p-2 bg-green-500 text-white rounded-full hover:bg-green-600 focus:outline-none"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-4 w-4"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      d="M10 2a5 5 0 00-5 5v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2H7V7a3 3 0 015.905-.75 1 1 0 001.937-.5A5.002 5.002 0 0010 2z"
+                    />
+                  </svg>
+                </button>
+              </li>
+              <% }) %>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // New JavaScript for search functionality
+      document
+        .getElementById("searchInput")
+        .addEventListener("input", function () {
+          const searchTerm = this.value.toLowerCase();
+          document
+            .querySelectorAll(
+              "#active-list li, #allowed-list li, #blocked-list li"
+            )
+            .forEach((item) => {
+              const domainName = item
+                .querySelector("span")
+                .textContent.toLowerCase();
+              if (domainName.includes(searchTerm)) {
+                item.style.display = "";
+              } else {
+                item.style.display = "none";
+              }
+            });
+        });
+
+      // New JavaScript for domain input and buttons
+      document
+        .getElementById("blockDomainBtn")
+        .addEventListener("click", function () {
+          const domain = document.getElementById("domainInput").value;
+          if (domain) {
+            console.log("Blocking domain:", domain);
+            // Add logic to block the domain
+            document.getElementById("domainInput").value = "";
+          }
+        });
+
+      document
+        .getElementById("acceptDomainBtn")
+        .addEventListener("click", function () {
+          const domain = document.getElementById("domainInput").value;
+          if (domain) {
+            console.log("Accepting domain:", domain);
+            // Add logic to accept the domain
+            document.getElementById("domainInput").value = "";
+          }
+        });
+
+      document
+        .getElementById("trashDomainBtn")
+        .addEventListener("click", function () {
+          const domain = document.getElementById("domainInput").value;
+          if (domain) {
+            console.log("Trashing domain:", domain);
+            // Add logic to trash the domain
+            document.getElementById("domainInput").value = "";
+          }
+        });
+
+      function handleBlock(domainId) {
+        updateDomainStatus(domainId, false);
+        moveDomain(domainId, "allowed", "blocked");
+      }
+
+      function handleUnblock(domainId) {
+        updateDomainStatus(domainId, true);
+        moveDomain(domainId, "blocked", "allowed");
+      }
+
+      function moveDomain(domainId, fromTab, toTab) {
+        const item = document.querySelector(
+          `#${fromTab}-list li[data-id="${domainId}"]`
+        );
+        if (item) {
+          const newItem = item.cloneNode(true);
+          if (toTab === "blocked") {
+            newItem
+              .querySelector("button")
+              .setAttribute("onclick", `handleUnblock('${domainId}')`);
+            newItem
+              .querySelector("button")
+              .classList.remove("bg-red-500", "hover:bg-red-600");
+            newItem
+              .querySelector("button")
+              .classList.add("bg-green-500", "hover:bg-green-600");
+            newItem.querySelector("svg").innerHTML =
+              '<path d="M10 2a5 5 0 00-5 5v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2H7V7a3 3 0 015.905-.75 1 1 0 001.937-.5A5.002 5.002 0 0010 2z" />';
+          } else {
+            newItem
+              .querySelector("button")
+              .setAttribute("onclick", `handleBlock('${domainId}')`);
+            newItem
+              .querySelector("button")
+              .classList.remove("bg-green-500", "hover:bg-green-600");
+            newItem
+              .querySelector("button")
+              .classList.add("bg-red-500", "hover:bg-red-600");
+            newItem.querySelector("svg").innerHTML =
+              '<path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />';
+          }
+          document.querySelector(`#${toTab}-list`).appendChild(newItem);
+          item.remove();
+        }
+      }
+
+      function updateDomainStatus(domainId, newStatus) {
+        fetch(`/updateDomain/${domainId}`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ status: newStatus }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            console.log("Cập nhật trạng thái thành công", data);
+          })
+          .catch((error) => {
+            console.error("Lỗi khi cập nhật trạng thái", error);
+          });
+      }
+
+      document
+        .getElementById("allowAllRadio")
+        .addEventListener("change", function () {
+          if (this.checked) {
+            console.log("Cho phép tất cả domain");
+          }
+        });
+
+      document
+        .getElementById("blockAllRadio")
+        .addEventListener("change", function () {
+          if (this.checked) {
+            console.log("Chặn tất cả domain");
+            // Thêm logic để chặn tất cả domain
+          }
+        });
+
+      document.querySelectorAll(".tab-btn").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          document.querySelectorAll(".tab-content").forEach(function (content) {
+            content.classList.add("hidden");
+          });
+          document.getElementById(this.dataset.tab).classList.remove("hidden");
+          document.querySelectorAll(".tab-btn").forEach(function (btn) {
+            btn.classList.remove("bg-white", "border-b-2", "border-blue-500");
+            btn.classList.add("bg-gray-200");
+          });
+          this.classList.remove("bg-gray-200");
+          this.classList.add("bg-white", "border-b-2", "border-blue-500");
+        });
+      });
+
+      document.querySelector(".tab-btn").click();
+    </script>
+  </body>
+</html>

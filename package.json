@@ -1,5 +1,5 @@
 {
-  "name": "ls1",
+  "name": "proxy-server-manament",
   "version": "0.0.0",
   "private": true,
   "scripts": {
@@ -13,7 +13,6 @@
     "http-errors": "~1.6.3",
     "mongo": "^0.1.0",
     "mongoose": "^8.8.2",
-    "mongose": "^0.0.2-security",
     "morgan": "~1.9.1",
     "nodemon": "^3.1.7",
     "socket.io": "^4.8.1",

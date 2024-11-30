@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Trash</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+
+  <body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+      <h2 class="text-3xl font-bold mb-6 text-red">Thùng rác</h2>
+      <div class="mb-4 space-x-2">
+        <button
+          id="blockAllBtn"
+          class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded"
+        >
+          Xóa tất cả các domain
+        </button>
+      </div>
+      <div class="bg-white shadow-md rounded-lg overflow-hidden">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th
+                scope="col"
+                class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider"
+              >
+                #
+              </th>
+              <th
+                scope="col"
+                class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Domain
+              </th>
+
+              <th
+                scope="col"
+                class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Hành động
+              </th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <% data.forEach((data, index) => { %>
+            <tr>
+              <td class="px-6 py-4 whitespace-nowrap text-base text-gray-500">
+                <%= index + 1 %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-base text-gray-900">
+                <%= data.ip %>
+              </td>
+              <td
+                class="px-6 py-4 whitespace-nowrap text-base text-base font-medium"
+              >
+                <button
+                  id="blockBtn<%= data._id %>"
+                  class="blockBtn text-white font-bold py-2 px-4 rounded text-sm bg-red-500 hover:bg-red-600"
+                >
+                  Xóa vĩnh viễn
+                </button>
+              </td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </body>
+</html>

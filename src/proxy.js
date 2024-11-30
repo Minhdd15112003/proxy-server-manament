@@ -9,7 +9,12 @@ class ProxyServer {
     const server = http.createServer((req, res) => {});
     server.on("connect", async (req, clientSocket, head) => {
       const [host, port] = req.url.split(":");
-      if ((await this.blockIpClient()) === false) {
+
+      if (
+        (await this.blockIpClient()) === false ||
+        (await this.blockDomain(host)) === false
+      ) {
+        console.log("Access to this website is blocked.");
         clientSocket.write(
           "HTTPS/1.1 403 Forbidden\r\n" +
             "Content-Type: text/plain\r\n\r\n" +
@@ -68,12 +73,23 @@ class ProxyServer {
     }
   }
 
-  // async blockDomain(hostname) {
-  //   const ip = await domainModal.find({ status: false }).exec();
-  //   const domain = ip.map((item) => item.domain);
-  //   console.log(domain);
-  //   return domain.includes(hostname);
-  // }
+  async blockDomain(hostname) {
+    const ip = await domainModal.find({ status: true }).exec(); // Lấy tất cả các domain có status = true
+    for (const domain of ip) {
+      for (const item of domain.domain) {
+        if (item.domainName === hostname) {
+          // Nếu tên miền trùng và có statusDomain = false, trả về false (chặn tên miền)
+          if (item.statusDomain === false) {
+            return false; // Tên miền này bị chặn
+          }
+          // Nếu tên miền trùng và có statusDomain = true, không chặn tên miền
+          return true;
+        }
+      }
+    }
+    // Nếu không tìm thấy tên miền, trả về true (không bị chặn)
+    return true;
+  }
 
   handleHttpsRequest(req, clientSocket, head, host, port) {
     const serverSocket = net.connect(port, host, () => {
@@ -90,30 +106,26 @@ class ProxyServer {
 
     serverSocket.on("error", (err) => {
       console.log(`Error in HTTPS connection: ${err.message}`);
-      if (!clientSocket.destroyed) {
-        clientSocket.end();
-      }
+
+      clientSocket.end();
     });
 
     clientSocket.on("error", (err) => {
       console.log(`Error in client socket: ${err.message}`);
-      if (!serverSocket.destroyed) {
-        serverSocket.end();
-      }
+
+      serverSocket.end();
     });
 
     clientSocket.on("close", () => {
       console.log("Client socket closed");
-      if (!serverSocket.destroyed) {
-        serverSocket.end();
-      }
+
+      serverSocket.end();
     });
 
     serverSocket.on("close", () => {
       console.log("Server socket closed");
-      if (!clientSocket.destroyed) {
-        clientSocket.end();
-      }
+
+      clientSocket.end();
     });
   }
 }
