@@ -5,8 +5,10 @@ var proxyRouter = express.Router();
 proxyRouter.get("/ip", proxyController.findIp);
 proxyRouter.patch("/updateIp/:id", proxyController.updateIp);
 
-proxyRouter.get("/domain/:id", proxyController.findDomain);
+proxyRouter.get("/ip/:id/domain", proxyController.findDomain);
 proxyRouter.patch("/updateDomain/:id", proxyController.updateDomain);
+proxyRouter.patch("/postDomain/:id", proxyController.postDomain);
 
-proxyRouter.get("/Trash", proxyController.findTrash);
+proxyRouter.get("/blockWhileList", proxyController.findTrash);
+
 module.exports = proxyRouter;

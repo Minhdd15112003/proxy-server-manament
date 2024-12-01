@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quản lý Domain</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+      <h1 class="text-3xl font-bold mb-6 text-center">Quản lý Domain</h1>
+
+      <div class="bg-white rounded-2xl shadow-md overflow-hidden">
+        <div class="flex">
+          <button
+            class="tab-btn py-3 px-6 w-1/2 font-semibold text-gray-700 bg-gray-200 hover:bg-gray-300 focus:outline-none rounded-tl-2xl"
+            data-tab="blocklist"
+          >
+            Block List
+          </button>
+          <button
+            class="tab-btn py-3 px-6 w-1/2 font-semibold text-gray-700 bg-gray-200 hover:bg-gray-300 focus:outline-none rounded-tr-2xl"
+            data-tab="whitelist"
+          >
+            White List
+          </button>
+        </div>
+        <div class="p-6">
+          <div id="blocklist" class="tab-content">
+            <h2 class="text-xl font-semibold mb-4">Block List</h2>
+            <ul class="space-y-3" id="blocklist-items">
+              <% blockDomains.forEach(domain => { %>
+              <li
+                class="bg-gray-100 p-3 rounded-xl flex justify-between items-center"
+                data-id="<%= domain.id %>"
+              >
+                <span><%= domain.domainName %></span>
+                <button
+                  onclick="moveDomain('<%= domain.id %>', 'blocklist', 'whitelist')"
+                  class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
+                >
+                  Move to White List
+                </button>
+              </li>
+              <% }) %>
+            </ul>
+          </div>
+          <div id="whitelist" class="tab-content hidden">
+            <h2 class="text-xl font-semibold mb-4">White List</h2>
+            <ul class="space-y-3" id="whitelist-items">
+              <% whileDomains.forEach(domain => { %>
+              <li
+                class="bg-gray-100 p-3 rounded-xl flex justify-between items-center"
+                data-id="<%= domain.id %>"
+              >
+                <span><%= domain.domainName %></span>
+                <button
+                  onclick="moveDomain('<%= domain.id %>', 'whitelist', 'blocklist')"
+                  class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500"
+                >
+                  Move to Block List
+                </button>
+              </li>
+              <% }) %>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Tab switching functionality
+      document.querySelectorAll(".tab-btn").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          document.querySelectorAll(".tab-content").forEach(function (content) {
+            content.classList.add("hidden");
+          });
+          document.getElementById(this.dataset.tab).classList.remove("hidden");
+          document.querySelectorAll(".tab-btn").forEach(function (btn) {
+            btn.classList.remove("bg-white", "border-b-2", "border-blue-500");
+            btn.classList.add("bg-gray-200");
+          });
+          this.classList.remove("bg-gray-200");
+          this.classList.add("bg-white", "border-b-2", "border-blue-500");
+        });
+      });
+
+      // Function to move domain between lists
+      function moveDomain(domainId, fromList, toList) {
+        const item = document.querySelector(
+          `#${fromList}-items li[data-id="${domainId}"]`
+        );
+        if (item) {
+          const newItem = item.cloneNode(true);
+          const button = newItem.querySelector("button");
+          if (toList === "blocklist") {
+            button.textContent = "Move to White List";
+            button.classList.remove(
+              "bg-red-500",
+              "hover:bg-red-600",
+              "focus:ring-red-500"
+            );
+            button.classList.add(
+              "bg-green-500",
+              "hover:bg-green-600",
+              "focus:ring-green-500"
+            );
+            button.setAttribute(
+              "onclick",
+              `moveDomain('${domainId}', 'blocklist', 'whitelist')`
+            );
+          } else {
+            button.textContent = "Move to Block List";
+            button.classList.remove(
+              "bg-green-500",
+              "hover:bg-green-600",
+              "focus:ring-green-500"
+            );
+            button.classList.add(
+              "bg-red-500",
+              "hover:bg-red-600",
+              "focus:ring-red-500"
+            );
+            button.setAttribute(
+              "onclick",
+              `moveDomain('${domainId}', 'whitelist', 'blocklist')`
+            );
+          }
+          document.querySelector(`#${toList}-items`).appendChild(newItem);
+          item.remove();
+
+          // Here you would typically make an API call to update the domain's status
+          console.log(`Moved domain ${domainId} from ${fromList} to ${toList}`);
+        }
+      }
+
+      // Activate the first tab by default
+      document.querySelector(".tab-btn").click();
+    </script>
+  </body>
+</html>
