@@ -139,19 +139,44 @@ function updateDomainStatus(domainId, newStatus) {
     });
 }
 
+// Hàm update tất cả domain status
+async function updateAllDomainStatus(newStatus) {
+  const domainId = id; // ID của domain hoặc IP mà bạn muốn cập nhật"
+  try {
+    const response = await fetch(`/updateAllDomains/${domainId}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ status: newStatus }),
+    });
+
+    const data = await response.json();
+    console.log("Cập nhật trạng thái thành công", data);
+    window.location.reload();
+  } catch (error) {
+    console.error("Lỗi khi cập nhật trạng thái", error);
+  }
+}
+
+// Lắng nghe sự thay đổi của checkbox "Cho phép tất cả domain hoạt động"
 document
-  .getElementById("allowAllRadio")
-  .addEventListener("change", function () {
+  .getElementById("allowAllCheckbox")
+  .addEventListener("change", async function () {
     if (this.checked) {
-      console.log("Cho phép tất cả domain");
+      console.log("Cho phép tất cả domain hoạt động");
+      document.getElementById("blockAllCheckbox").checked = false;
+      await updateAllDomainStatus(true); // Cho phép tất cả
     }
   });
 
+// Lắng nghe sự thay đổi của checkbox "Chặn tất cả domain"
 document
-  .getElementById("blockAllRadio")
-  .addEventListener("change", function () {
+  .getElementById("blockAllCheckbox")
+  .addEventListener("change", async function () {
     if (this.checked) {
       console.log("Chặn tất cả domain");
-      // Thêm logic để chặn tất cả domain
+      document.getElementById("allowAllCheckbox").checked = false;
+      await updateAllDomainStatus(false); // Chặn tất cả
     }
   });

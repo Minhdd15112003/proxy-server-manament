@@ -46,6 +46,36 @@ class proxyController {
       });
   }
 
+  async updateAllDomains(req, res) {
+    const { status } = req.body; // Nhận status (true hoặc false) từ frontend
+    const { id } = req.params; // ID của IP hoặc domain nhóm bạn muốn cập nhật trạng thái
+
+    try {
+      // Tìm và cập nhật trạng thái cho tất cả domain trong group hoặc IP
+      const updatedData = await domainModal.findByIdAndUpdate(
+        id,
+        {
+          $set: {
+            "domain.$[].statusDomain": status, // Cập nhật tất cả domain trong nhóm
+          },
+        },
+        { new: true }
+      );
+
+      if (!updatedData) {
+        return res.status(404).json({ message: "Không tìm thấy dữ liệu" });
+      }
+
+      res.json({
+        message: "Cập nhật trạng thái thành công",
+        data: updatedData,
+      });
+    } catch (err) {
+      console.error("Lỗi khi cập nhật trạng thái:", err);
+      res.status(500).json({ message: "Cập nhật trạng thái không thành công" });
+    }
+  }
+
   async findDomain(req, res) {
     await domainModal
       .findById(req.params.id)
