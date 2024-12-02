@@ -23,9 +23,9 @@ class proxyController {
       });
   }
 
-  async findTrash(req, res) {
+  async findBlockWhite(req, res) {
     await domainModal
-      .findById("674c0b3eaf69d8cea4318bb0")
+      .findById(req.params.id)
       .then((data) => {
         const whileDomains = data.domain.filter(
           (domain) => domain.blockWhiteStatus === 2
@@ -35,6 +35,7 @@ class proxyController {
         );
         console.log(whileDomains);
         res.render("blockWhiteStatus", {
+          idIp: data.id,
           data: data.domain,
           whileDomains,
           blockDomains,
@@ -47,16 +48,15 @@ class proxyController {
   }
 
   async updateAllDomains(req, res) {
-    const { status } = req.body; // Nhận status (true hoặc false) từ frontend
-    const { id } = req.params; // ID của IP hoặc domain nhóm bạn muốn cập nhật trạng thái
+    const { status } = req.body;
+    const { id } = req.params;
 
     try {
-      // Tìm và cập nhật trạng thái cho tất cả domain trong group hoặc IP
       const updatedData = await domainModal.findByIdAndUpdate(
         id,
         {
           $set: {
-            "domain.$[].statusDomain": status, // Cập nhật tất cả domain trong nhóm
+            "domain.$[].statusDomain": status,
           },
         },
         { new: true }

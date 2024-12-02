@@ -5,10 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Quản lý Domain</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Thêm Font Awesome để sử dụng icon thùng rác -->
+    <link
+      href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
+      rel="stylesheet"
+    />
   </head>
+
   <body class="bg-gray-100 min-h-screen">
     <div class="container mx-auto px-4 py-8">
-      <h1 class="text-3xl font-bold mb-6 text-center">Quản lý Domain</h1>
+      <h1 class="text-3xl font-bold mb-6 text-center">
+        Quản lý danh sách Block và White
+      </h1>
 
       <div class="bg-white rounded-2xl shadow-md overflow-hidden">
         <div class="flex">
@@ -31,16 +39,26 @@
             <ul class="space-y-3" id="blocklist-items">
               <% blockDomains.forEach(domain => { %>
               <li
-                class="bg-gray-100 p-3 rounded-xl flex justify-between items-center"
+                class="domain-item bg-gray-100 p-3 rounded-xl flex justify-between items-center"
                 data-id="<%= domain.id %>"
               >
                 <span><%= domain.domainName %></span>
-                <button
-                  onclick="moveDomain('<%= domain.id %>', 'blocklist', 'whitelist')"
-                  class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
-                >
-                  Move to White List
-                </button>
+                <div class="flex items-center space-x-3">
+                  <button
+                    class="whileListDomainBtn px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  >
+                    Move to White List
+                  </button>
+                  <!-- Thùng rác để xóa domain -->
+
+                  <button
+                    class="deleteDomainBtn text-red-500 hover:text-red-600 focus:outline-none"
+                  >
+                    <img
+                      src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAdBJREFUSEudVsttwzAMfcwsBQo063ScHAt0mayTAFkmLPiTSIn2oT4YgSWRfB9SIRw8BID15Rvy7/zpdCNBlqHvEsg/HCVolrc6PTFthaUPDHwD+GHgc9+oNb0IuBFwn8dqRENw8DDwAPA1l2vpApqAJ4GumQICF0KcIuErFiwQ+6kLQMFgriXWySJUqkOnM5rfW4K6m8EsoYmFwM4NIbJni4pGKY34gqvTIyMYiBzUQC0VhyjKrydwrk/UqpXQDOPcLb5mFsoNfY2aRZ5BZbMUIVqt+1sXreI1PabgwxR1/4lNoynZzUQaQ8OogoHIAhIuUKiCVY8EgtwTrV7jQE7gbpF04a6ZMFNae8USLByskN9gNWLYMRCEmEMDY6085wmOKHLyFYF0gHNYRA4gnYCrK1bRTRZzjWlgdYdms+nC6st0bCky32jHlnVF0GiQrL810FZxVBgJGoqyy3LAgz6oFU2RrZGKyK7BliCxsk3T485cazPLtI1WEiyTarhis10e6aOu/2hAD4DTRdNdqxuaJwHXPELcxfuQlKuSgV8ifKw3fx7XaeK+GLhdCPf1WkgiV/hbfd7yaqD82+ldb8P4I5FmkSfoR+fJXbDflTnEHzezGi7jT6qJAAAAAElFTkSuQmCC"
+                    />
+                  </button>
+                </div>
               </li>
               <% }) %>
             </ul>
@@ -50,16 +68,25 @@
             <ul class="space-y-3" id="whitelist-items">
               <% whileDomains.forEach(domain => { %>
               <li
-                class="bg-gray-100 p-3 rounded-xl flex justify-between items-center"
+                class="domain-item bg-gray-100 p-3 rounded-xl flex justify-between items-center"
                 data-id="<%= domain.id %>"
               >
                 <span><%= domain.domainName %></span>
-                <button
-                  onclick="moveDomain('<%= domain.id %>', 'whitelist', 'blocklist')"
-                  class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500"
-                >
-                  Move to Block List
-                </button>
+                <div class="flex items-center space-x-3">
+                  <button
+                    class="blockListDomainBtn px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500"
+                  >
+                    Move to Block List
+                  </button>
+                  <!-- Thùng rác để xóa domain -->
+                  <button
+                    class="deleteDomainBtn text-red-500 hover:text-red-600 focus:outline-none"
+                  >
+                    <img
+                      src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAdBJREFUSEudVsttwzAMfcwsBQo063ScHAt0mayTAFkmLPiTSIn2oT4YgSWRfB9SIRw8BID15Rvy7/zpdCNBlqHvEsg/HCVolrc6PTFthaUPDHwD+GHgc9+oNb0IuBFwn8dqRENw8DDwAPA1l2vpApqAJ4GumQICF0KcIuErFiwQ+6kLQMFgriXWySJUqkOnM5rfW4K6m8EsoYmFwM4NIbJni4pGKY34gqvTIyMYiBzUQC0VhyjKrydwrk/UqpXQDOPcLb5mFsoNfY2aRZ5BZbMUIVqt+1sXreI1PabgwxR1/4lNoynZzUQaQ8OogoHIAhIuUKiCVY8EgtwTrV7jQE7gbpF04a6ZMFNae8USLByskN9gNWLYMRCEmEMDY6085wmOKHLyFYF0gHNYRA4gnYCrK1bRTRZzjWlgdYdms+nC6st0bCky32jHlnVF0GiQrL810FZxVBgJGoqyy3LAgz6oFU2RrZGKyK7BliCxsk3T485cazPLtI1WEiyTarhis10e6aOu/2hAD4DTRdNdqxuaJwHXPELcxfuQlKuSgV8ifKw3fx7XaeK+GLhdCPf1WkgiV/hbfd7yaqD82+ldb8P4I5FmkSfoR+fJXbDflTnEHzezGi7jT6qJAAAAAElFTkSuQmCC"
+                    />
+                  </button>
+                </div>
               </li>
               <% }) %>
             </ul>
@@ -69,73 +96,149 @@
     </div>
 
     <script>
-      // Tab switching functionality
-      document.querySelectorAll(".tab-btn").forEach(function (btn) {
-        btn.addEventListener("click", function () {
-          document.querySelectorAll(".tab-content").forEach(function (content) {
-            content.classList.add("hidden");
+      document.addEventListener("DOMContentLoaded", function () {
+        // Function to handle switching between tabs
+        document.querySelectorAll(".tab-btn").forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            document
+              .querySelectorAll(".tab-content")
+              .forEach(function (content) {
+                content.classList.add("hidden");
+              });
+            document
+              .getElementById(this.dataset.tab)
+              .classList.remove("hidden");
+            document.querySelectorAll(".tab-btn").forEach(function (btn) {
+              btn.classList.remove("bg-white", "border-b-2", "border-blue-500");
+              btn.classList.add("bg-gray-200");
+            });
+            this.classList.remove("bg-gray-200");
+            this.classList.add("bg-white", "border-b-2", "border-blue-500");
           });
-          document.getElementById(this.dataset.tab).classList.remove("hidden");
-          document.querySelectorAll(".tab-btn").forEach(function (btn) {
-            btn.classList.remove("bg-white", "border-b-2", "border-blue-500");
-            btn.classList.add("bg-gray-200");
-          });
-          this.classList.remove("bg-gray-200");
-          this.classList.add("bg-white", "border-b-2", "border-blue-500");
         });
-      });
 
-      // Function to move domain between lists
-      function moveDomain(domainId, fromList, toList) {
-        const item = document.querySelector(
-          `#${fromList}-items li[data-id="${domainId}"]`
-        );
-        if (item) {
-          const newItem = item.cloneNode(true);
-          const button = newItem.querySelector("button");
-          if (toList === "blocklist") {
-            button.textContent = "Move to White List";
-            button.classList.remove(
-              "bg-red-500",
-              "hover:bg-red-600",
-              "focus:ring-red-500"
-            );
-            button.classList.add(
-              "bg-green-500",
-              "hover:bg-green-600",
-              "focus:ring-green-500"
-            );
-            button.setAttribute(
-              "onclick",
-              `moveDomain('${domainId}', 'blocklist', 'whitelist')`
-            );
-          } else {
-            button.textContent = "Move to Block List";
-            button.classList.remove(
-              "bg-green-500",
-              "hover:bg-green-600",
-              "focus:ring-green-500"
-            );
-            button.classList.add(
-              "bg-red-500",
-              "hover:bg-red-600",
-              "focus:ring-red-500"
-            );
-            button.setAttribute(
-              "onclick",
-              `moveDomain('${domainId}', 'whitelist', 'blocklist')`
+        // Function to move domains between lists
+        function moveDomain(domainId, fromList, toList) {
+          const fromListElement = document.getElementById(`${fromList}-items`);
+          const toListElement = document.getElementById(`${toList}-items`);
+          const domainItem = fromListElement.querySelector(
+            `[data-id="${domainId}"]`
+          );
+
+          if (domainItem) {
+            const clonedItem = domainItem.cloneNode(true);
+            const button = clonedItem.querySelector("button");
+
+            // Adjust button text and classes based on the target list
+            if (toList === "blocklist") {
+              button.textContent = "Move to White List";
+              button.classList.replace("bg-red-500", "bg-green-500");
+              button.classList.replace(
+                "hover:bg-red-600",
+                "hover:bg-green-600"
+              );
+              button.classList.replace(
+                "focus:ring-red-500",
+                "focus:ring-green-500"
+              );
+              button.setAttribute(
+                "onclick",
+                `moveDomain('${domainId}', 'whitelist', 'blocklist')`
+              );
+            } else {
+              button.textContent = "Move to Block List";
+              button.classList.replace("bg-green-500", "bg-red-500");
+              button.classList.replace(
+                "hover:bg-green-600",
+                "hover:bg-red-600"
+              );
+              button.classList.replace(
+                "focus:ring-green-500",
+                "focus:ring-red-500"
+              );
+              button.setAttribute(
+                "onclick",
+                `moveDomain('${domainId}', 'blocklist', 'whitelist')`
+              );
+            }
+
+            // Append the new item to the target list and remove the original item
+            toListElement.appendChild(clonedItem);
+            domainItem.remove();
+
+            // Optionally, update the domain status via an API
+            handleUpdateBlockWhiteList(
+              domainId,
+              toList === "blocklist" ? 1 : 2
             );
           }
-          document.querySelector(`#${toList}-items`).appendChild(newItem);
-          item.remove();
-
-          // Here you would typically make an API call to update the domain's status
-          console.log(`Moved domain ${domainId} from ${fromList} to ${toList}`);
         }
-      }
 
-      // Activate the first tab by default
-      document.querySelector(".tab-btn").click();
+        // API call to update domain status
+        function handleUpdateBlockWhiteList(domainId, status) {
+          fetch(`/updateDomain/${domainId}`, {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ blockWhiteStatus: status }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              console.log("Cập nhật trạng thái thành công", data);
+            })
+            .catch((error) => {
+              console.error("Lỗi khi cập nhật trạng thái", error);
+            });
+        }
+
+        // Handle delete domain functionality
+        function deleteDomain(domainId, blockWhiteStatus) {
+          if (confirm("Are you sure you want to delete this domain?")) {
+            fetch(`/updateDomain/${domainId}`, {
+              method: "PATCH",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ blockWhiteStatus: blockWhiteStatus }),
+            })
+              .then((response) => response.json())
+              .then((data) => {
+                console.log("Cập nhật trạng thái thành công", data);
+              })
+              .catch((error) => {
+                console.error("Lỗi khi cập nhật trạng thái", error);
+              });
+          }
+        }
+
+        // Attach event listeners for buttons to move domains
+        document.querySelectorAll(".whileListDomainBtn").forEach((button) => {
+          button.addEventListener("click", function () {
+            const domainId = this.closest("li").dataset.id;
+            moveDomain(domainId, "blocklist", "whitelist");
+          });
+        });
+
+        document.querySelectorAll(".blockListDomainBtn").forEach((button) => {
+          button.addEventListener("click", function () {
+            const domainId = this.closest("li").dataset.id;
+            moveDomain(domainId, "whitelist", "blocklist");
+          });
+        });
+
+        // Attach event listeners to delete domain buttons
+        document.querySelectorAll(".deleteDomainBtn").forEach((button) => {
+          button.addEventListener("click", function () {
+            const domainId = this.closest("li").dataset.id;
+            deleteDomain(domainId, 0);
+            window.location.reload();
+          });
+        });
+
+        // Activate the first tab by default
+        document.querySelector(".tab-btn").click();
+      });
     </script>
   </body>
 </html>
