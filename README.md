@@ -6,13 +6,19 @@ A robust and flexible domain management application designed to provide comprehe
 
 ## Table of Contents
 
+- [Features](#features)
+- [Prerequisites](#prerequisites)
 - [Installation](#installation)
-- [Features](#Features)
 - [Usage](#usage)
 - [API Endpoints](#api-endpoints)
-- [File Structure](#file-structure)
+- [Project Structure](#project-structure)
+- [Development Workflow](#development-workflow)
+- [Deployment](#deployment)
+- [Security Considerations](#security-considerations)
 - [Contributing](#contributing)
+- [Troubleshooting](#troubleshooting)
 - [License](#license)
+- [Contact](#contact)
 
 ## Features
 
@@ -24,6 +30,7 @@ A robust and flexible domain management application designed to provide comprehe
 
 ## Prerequisites
 
+Ensure you have the following installed:
 - Node.js (v16.x or later)
 - MongoDB (v5.x or later)
 - npm (v8.x or later)
@@ -42,7 +49,7 @@ npm install
 ```
 
 ### 3. Configure Environment Variables
-Create a `.env` file in the project root with the following configurations:
+Create a `.env` file in the project root:
 ```env
 MONGODB_URI=mongodb://localhost:27017/proxymanagement
 PORT=3000
@@ -57,6 +64,13 @@ npm run dev
 # Production mode
 npm start
 ```
+
+## Usage
+
+1. Ensure MongoDB is running
+2. Start the application using the commands above
+3. Access the API endpoints via `http://localhost:3000`
+4. Use API clients like Postman or cURL to interact with the endpoints
 
 ## API Endpoints
 
@@ -122,62 +136,74 @@ proxy-server-management/
 
 ## Development Workflow
 
-### Linting
+### Code Quality
 ```bash
+# Run linter
 npm run lint
-```
 
-### Testing
-```bash
+# Run tests
 npm test
 ```
 
 ## Deployment
 
-1. Ensure all environment variables are correctly set
-2. Use process managers like PM2 for production deployment
+1. Set environment variables securely
+2. Use process managers like PM2 for production
 3. Configure reverse proxy (Nginx recommended)
+4. Implement CI/CD pipelines
 
 ## Security Considerations
 
-- Keep `.env` file secure and out of version control
-- Use strong, unique MongoDB credentials
-- Implement rate limiting and input validation
-- Regular dependency updates
+- Secure `.env` file (add to `.gitignore`)
+- Use strong MongoDB credentials
+- Implement:
+  - Rate limiting
+  - Input validation
+  - Authentication middleware
+- Regularly update dependencies
+- Use HTTPS
+- Implement proper error handling
 
 ## Contributing
 
+### Contribution Guidelines
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to branch (`git push origin feature/AmazingFeature`)
+2. Create a feature branch 
+   ```bash
+   git checkout -b feature/YourFeatureName
+   ```
+3. Commit changes 
+   ```bash
+   git commit -m 'Add detailed description of changes'
+   ```
+4. Push to branch 
+   ```bash
+   git push origin feature/YourFeatureName
+   ```
 5. Open a Pull Request
 
 ## Troubleshooting
 
-- Ensure MongoDB is running
-- Check network permissions
-- Verify environment configurations
-- Review server logs for detailed error information
+Common issues and solutions:
+- MongoDB connection problems
+  - Verify connection string
+  - Check MongoDB service status
+- Dependency conflicts
+  - Run `npm cache clean --force`
+  - Reinstall dependencies
+- Port conflicts
+  - Change port in `.env`
+  - Check for running processes
 
 ## License
 
-Distributed under the MIT License. See `LICENSE.md` for more details.
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ## Contact
 
-Project Maintainer - your.email@example.com
+**Project Maintainer:** Minh 
+- Email:minhtit006@gmail.com
+- GitHub: [@Minhdd15112003](https://github.com/Minhdd15112003)
+- Project Link: [[https://github.com/Minhdd15112003/proxy-server-manament](https://github.com/Minhdd15112003/proxy-server-manament)]
 
-Project Link: [https://github.com/yourusername/proxy-server-management](https://github.com/yourusername/proxy-server-management)
-```
-
-I've significantly enhanced the README by:
-
-1. Adding more detailed sections
-2. Improving formatting and readability
-3. Including best practices for development and deployment
-4. Adding emojis for visual appeal
-5. Providing comprehensive documentation
-6. Structuring content for easy navigation
-
-The README now offers a holistic view of the project, its structure, and how to work with it. Would you like me to modify anything further?
+---
