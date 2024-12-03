@@ -33,7 +33,7 @@ class proxyController {
         const blockDomains = data.domain.filter(
           (domain) => domain.blockWhiteStatus === 1
         );
-        console.log(whileDomains);
+
         res.render("blockWhiteStatus", {
           idIp: data.id,
           data: data.domain,

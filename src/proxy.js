@@ -1,11 +1,7 @@
 const http = require("http");
-const dns = require("dns");
-const path = require("path");
+const tldjs = require("tldjs");
 const net = require("net");
 const domainModal = require("./model/domain.model");
-const cluster = require("cluster");
-const os = require("os");
-const numCPUs = os.cpus().length;
 
 class ProxyServer {
   constructor() {
@@ -23,7 +19,7 @@ class ProxyServer {
       const isDomainBlocked = await this.blockDomain(host);
 
       // Nếu IP hoặc domain bị block, trả về lỗi 403
-      if (isIpBlocked === true || isDomainBlocked === true) {
+      if (isIpBlocked === false || isDomainBlocked === 1) {
         console.log("isDomainBlocked", isDomainBlocked, "domain ", host);
         console.log("Access to this website is blocked.");
         clientSocket.write(
@@ -33,7 +29,7 @@ class ProxyServer {
         );
 
         clientSocket.end();
-      } else if (isDomainBlocked === false) {
+      } else if (isDomainBlocked === 2) {
         this.handleHttpsRequest(req, clientSocket, head, host, port);
         await this.saveDomain(host, req);
       } else {
@@ -59,31 +55,29 @@ class ProxyServer {
     }
 
     const ip = await domainModal.find({ status: true }).exec();
-    let isBlocked = true; // Mặc định là blocked
-
+    let blocked = 0;
     for (const domain of ip) {
       for (const item of domain.domain) {
         if (item.domainName === hostname) {
           if (item.blockWhiteStatus === 1) {
             // Nếu blockWhiteStatus == 1, domain bị block bất kể statusDomain
-            isBlocked = true;
+            blocked = 1;
             break;
           } else if (item.blockWhiteStatus === 2) {
             // Nếu blockWhiteStatus == 2, domain luôn được phép truy cập
-            isBlocked = false;
+            blocked = 2;
             break;
-          } else if (item.statusDomain === false) {
-            isBlocked = true;
-          } else {
-            isBlocked = false;
+          } else if (item.blockWhiteStatus === 0) {
+            blocked = 0;
+            break;
           }
         }
       }
     }
     console.log(hostname);
     // Lưu vào cache và trả kết quả
-    this.domainCache.set(hostname, isBlocked);
-    return isBlocked;
+    this.domainCache.set(hostname, blocked);
+    return blocked;
   }
 
   async saveDomain(hostname, req) {
@@ -91,21 +85,25 @@ class ProxyServer {
       const clientIp = (
         req.connection.remoteAddress || req.socket.remoteAddress
       ).slice(7);
+      const baseDomain = tldjs.getDomain(hostname);
       const existClient = await domainModal.findOne({ ip: clientIp });
 
       if (!existClient) {
         await domainModal.create({
           ip: clientIp,
           status: true,
-          domain: [{ domainName: hostname, statusDomain: true }],
+          domain: [{ domainName: baseDomain, statusDomain: true }],
         });
         console.log("Saving new client:", clientIp, "with domain:", hostname);
       } else {
         const domainExists = existClient.domain.some(
-          (d) => d.domainName === hostname
+          (d) => d.domainName === baseDomain
         );
         if (!domainExists) {
-          existClient.domain.push({ domainName: hostname, statusDomain: true });
+          existClient.domain.push({
+            domainName: baseDomain,
+            statusDomain: true,
+          });
           await existClient.save();
           console.log(
             "Updating existing client:",
