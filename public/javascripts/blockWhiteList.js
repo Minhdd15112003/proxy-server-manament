@@ -29,7 +29,7 @@ async function handleAddDomain(
     console.log("handleAddDomain: ", error);
   }
 }
-// domain.js
+
 document.getElementById("searchInput").addEventListener("input", function () {
   const searchTerm = this.value.toLowerCase();
 
@@ -43,36 +43,6 @@ document.getElementById("searchInput").addEventListener("input", function () {
     }
   });
 });
-
-const idIp = document.getElementById("domainInput").dataset.id;
-
-document
-  .getElementById("blockListDomainBtn")
-  .addEventListener("click", async function () {
-    const domain = document.getElementById("domainInput").value;
-    if (domain) {
-      try {
-        await handleAddDomain(idIp, domain, true, 1);
-        document.getElementById("domainInput").value = "";
-      } catch (error) {
-        console.log("handleAddDomain: ", error);
-      }
-    }
-  });
-
-document
-  .getElementById("whileListDomainBtn")
-  .addEventListener("click", async function () {
-    const domain = document.getElementById("domainInput").value;
-    if (domain) {
-      try {
-        await handleAddDomain(idIp, domain, true, 2);
-        document.getElementById("domainInput").value = "";
-      } catch (error) {
-        console.log("handleAddDomain: ", error);
-      }
-    }
-  });
 
 document.addEventListener("DOMContentLoaded", function () {
   // Function to handle switching between tabs
@@ -133,7 +103,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // API call to update domain status
   function handleUpdateBlockWhiteList(domainId, status) {
-    fetch(`/updateDomain/${domainId}`, {
+    fetch(`/updateStatusDomain/${domainId}`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -152,7 +122,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // Handle delete domain functionality
   function deleteDomain(domainId, blockWhiteStatus) {
     if (confirm("Are you sure you want to delete this domain?")) {
-      fetch(`/updateDomain/${domainId}`, {
+      fetch(`/updateStatusDomain/${domainId}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

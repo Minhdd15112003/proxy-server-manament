@@ -1,7 +1,7 @@
 //thêm domain
 
 function handleUpdateBlockWhiteList(domainId, blockWhiteStatus) {
-  fetch(`/updateDomain/${domainId}`, {
+  fetch(`/updateStatusDomain/${domainId}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -123,7 +123,7 @@ function handleUnblock(domainId) {
 }
 
 function updateDomainStatus(domainId, newStatus) {
-  fetch(`/updateDomain/${domainId}`, {
+  fetch(`/updateStatusDomain/${domainId}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
