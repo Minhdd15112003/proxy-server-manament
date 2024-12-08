@@ -1,0 +1,250 @@
+<div
+  id="addDomainModal"
+  class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto flex items-center justify-center hidden"
+>
+  <div
+    class="relative w-full max-w-lg mx-auto border shadow-lg rounded-md bg-white mb-28"
+  >
+    <div class="mt-3 text-center">
+      <h3 class="text-lg leading-6 font-medium text-gray-900">
+        Add New Domain
+      </h3>
+      <div class="mt-2 px-7 py-3">
+        <form id="addDomainForm">
+          <div class="mb-4">
+            <label
+              for="domainName"
+              class="block text-sm font-medium text-gray-700"
+              >Domain Label</label
+            >
+            <input
+              type="text"
+              id="domainName"
+              name="domainName"
+              required
+              class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            />
+          </div>
+          <div class="mb-4">
+            <label
+              for="domainList"
+              class="block text-sm font-medium text-gray-700"
+              >Domains and Subdomains</label
+            >
+            <textarea
+              id="domainList"
+              name="domainList"
+              rows="4"
+              required
+              class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            ></textarea>
+          </div>
+          <div class="items-center px-4 py-3">
+            <button
+              id="submitDomainBtn"
+              type="submit"
+              class="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
+            >
+              Submit
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  const idIp = document.getElementById("searchInput").dataset.id;
+  document.addEventListener("DOMContentLoaded", function () {
+    // Existing JavaScript code...
+
+    // Modal functionality
+    const addDomainBtn = document.getElementById("addDomainBtn");
+    const addDomainModal = document.getElementById("addDomainModal");
+    const addDomainForm = document.getElementById("addDomainForm");
+
+    addDomainBtn.addEventListener("click", function () {
+      addDomainModal.classList.remove("hidden");
+      console.log("aadd model onm");
+    });
+
+    addDomainModal.addEventListener("click", function (e) {
+      if (e.target === addDomainModal) {
+        addDomainModal.classList.add("hidden");
+      }
+    });
+
+    addDomainForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const domainLable = document.getElementById("domainName").value;
+      const domainList = document.getElementById("domainList").value;
+
+      const lines = domainList
+        .split("\n")
+        .map((line) => line.trim())
+        .filter((line) => line !== "");
+
+      const firstLine = lines[0];
+      const domainArray = lines.slice(1);
+
+      // Fetch request to server
+      fetch(`/postblockDomain/${idIp}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          domainLable: domainLable,
+          domainName: firstLine,
+          subDomainName: domainArray,
+          blockWhiteStatus: 1,
+        }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          console.log("Thêm tên miền thành công", data);
+          window.location.reload();
+        })
+        .catch((error) => {
+          console.error("Lỗi khi thêm tên miền", error);
+        });
+    });
+  });
+</script>
+
+<div
+  id="editDomainModal"
+  class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto flex items-center justify-center hidden"
+>
+  <div
+    class="relative w-full max-w-lg mx-auto border shadow-lg rounded-md bg-white mb-28"
+  >
+    <div class="mt-3 text-center">
+      <h3 class="text-lg leading-6 font-medium text-gray-900">Edit Domain</h3>
+      <div class="mt-2 px-7 py-3">
+        <form id="editDomainForm">
+          <input type="hidden" id="editDomainId" name="editDomainId" />
+          <div class="mb-4">
+            <label
+              for="editDomainName"
+              class="block text-sm font-medium text-gray-700"
+              >Domain Label</label
+            >
+            <input
+              type="text"
+              id="editDomainName"
+              name="editDomainName"
+              required
+              class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            />
+          </div>
+          <div class="mb-4">
+            <label
+              for="editDomainList"
+              class="block text-sm font-medium text-gray-700"
+              >Domains and Subdomains</label
+            >
+            <textarea
+              id="editDomainList"
+              name="editDomainList"
+              rows="4"
+              required
+              class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            ></textarea>
+          </div>
+          <div class="items-center px-4 py-3">
+            <button
+              id="editSubmitDomainBtn"
+              type="submit"
+              class="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
+            >
+              Update
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const editDomainModal = document.getElementById("editDomainModal");
+    const editDomainForm = document.getElementById("editDomainForm");
+    const idIp = document.getElementById("searchInput").dataset.id;
+    const editDomainName = document.getElementById("editDomainName");
+    const editDomainList = document.getElementById("editDomainList");
+
+    // Edit Domain Button Click
+    document.querySelectorAll(".editDomainBtn").forEach((btn) => {
+      btn.addEventListener("click", function () {
+        const domainId = this.getAttribute("data-id");
+        const domainName = this.getAttribute("data-name");
+        const domainList = this.getAttribute("data-list");
+        const domainlabel = this.getAttribute("data-label");
+        console.log(domainName);
+
+        editDomainId.value = domainId;
+        editDomainName.value = domainlabel;
+        editDomainList.value = domainList;
+
+        const formattedDomainList = domainList
+          .split(",")
+          .map((domain) => domain.trim())
+          .filter((domain) => domain !== "")
+          .join(",\n");
+        editDomainList.value = domainName + "\n" + formattedDomainList;
+
+        editDomainModal.classList.remove("hidden");
+      });
+    });
+
+    // Close edit modal when clicking outside
+    editDomainModal.addEventListener("click", function (e) {
+      if (e.target === editDomainModal) {
+        editDomainModal.classList.add("hidden");
+      }
+    });
+
+    // Edit Domain Form Submission
+    editDomainForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      // const domainId = this.getAttribute("data-id");
+      const idIp = document.getElementById("searchInput").dataset.id;
+      const domainId = editDomainId.value;
+      const domainName = editDomainName.value;
+      const domainList = editDomainList.value;
+
+      const lines = domainList
+        .split("\n")
+        .map((line) => line.trim())
+        .filter((line) => line !== "");
+      const firstLine = lines[0];
+      const domainArray = lines.slice(1);
+      console.log(domainId);
+
+      fetch(`/updateblockDomain/${domainId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          domainLable: domainName,
+          domainName: firstLine,
+          subDomainName: domainArray,
+          blockWhiteStatus: 1,
+        }),
+      })
+        .then((response) => {
+          console.log("Update domain success", response);
+          // window.location.reload();
+        })
+        .catch((error) => {
+          console.error("Update domain error", error);
+        });
+    });
+
+    // editDomainModal.classList.add("hidden");
+  });
+</script>

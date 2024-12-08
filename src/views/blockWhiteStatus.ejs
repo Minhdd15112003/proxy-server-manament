@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Quản lý Domain</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Thêm Font Awesome để sử dụng icon thùng rác -->
     <link
       href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
       rel="stylesheet"
@@ -18,39 +17,13 @@
         Quản lý danh sách Block và White
       </h1>
 
-      <div class="mb-4">
-        <input
-          type="text"
-          id="searchInput"
-          placeholder="Tìm kiếm domain..."
-          class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-      </div>
-
-      <div class="mb-6 flex space-x-2">
-        <input
-          type="text"
-          id="domainInput"
-          placeholder="Nhập domain..."
-          class="flex-grow px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          data-id="<%= idIp %>"
-        />
-        <button
-          id="blockListDomainBtn"
-          class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500"
-        >
-          Block List
-        </button>
-        <button
-          id="whileListDomainBtn"
-          class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-gray-500"
-        >
-          While List
-        </button>
-      </div>
-        <!-- Hiển thị lỗi -->
-      <div id="error-message" class="text-red-500 text-sm hidden mt-2"></div>
-      <div class="bg-white rounded-2xl shadow-md overflow-hidden">
+      <input
+        type="text"
+        id="searchInput"
+        placeholder="Tìm kiếm domain..."
+        class="w-3/4 px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-10"
+        data-id="<%= idIp %>"
+      />
 
       <div class="bg-white rounded-2xl shadow-md overflow-hidden">
         <div class="flex">
@@ -69,7 +42,15 @@
         </div>
         <div class="p-6">
           <div id="blocklist" class="tab-content">
-            <h2 class="text-xl font-semibold mb-4">Block List</h2>
+            <div class="mb-4 flex justify-between items-center">
+              <h2 class="text-xl font-semibold mb-4">Block List</h2>
+              <button
+                id="addDomainBtn"
+                class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 mr-14"
+              >
+                Add Domain
+              </button>
+            </div>
             <ul class="space-y-3" id="blocklist-items">
               <% blockDomains.forEach(domain => { %>
               <li
@@ -79,19 +60,27 @@
                 <span><%= domain.domainName %></span>
                 <div class="flex items-center space-x-3">
                   <button
+                    class="editDomainBtn text-blue-500 hover:text-blue-600 focus:outline-none"
+                    data-id="<%= domain.id %>"
+                    data-name="<%= domain.domainName %>"
+                    data-list="<%= domain.subdomain %>"
+                  ></button>
+                  <button
                     class="whileListDomainBtn px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
                   >
                     Move to White List
                   </button>
-                  <!-- Thùng rác để xóa domain -->
+                  <i
+                    class="bx bx-edit-alt text-blue-500 hover:text-blue-600 focus:outline-none editDomainBtn"
+                    data-id="<%= domain.id %>"
+                    data-name="<%= domain.domainName %>"
+                    data-list="<%= domain.subdomain %>"
+                    data-label="<%= domain.domainLable %>"
+                  ></i>
 
-                  <button
-                    class="deleteDomainBtn text-red-500 hover:text-red-600 focus:outline-none"
-                  >
-                    <img
-                      src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAdBJREFUSEudVsttwzAMfcwsBQo063ScHAt0mayTAFkmLPiTSIn2oT4YgSWRfB9SIRw8BID15Rvy7/zpdCNBlqHvEsg/HCVolrc6PTFthaUPDHwD+GHgc9+oNb0IuBFwn8dqRENw8DDwAPA1l2vpApqAJ4GumQICF0KcIuErFiwQ+6kLQMFgriXWySJUqkOnM5rfW4K6m8EsoYmFwM4NIbJni4pGKY34gqvTIyMYiBzUQC0VhyjKrydwrk/UqpXQDOPcLb5mFsoNfY2aRZ5BZbMUIVqt+1sXreI1PabgwxR1/4lNoynZzUQaQ8OogoHIAhIuUKiCVY8EgtwTrV7jQE7gbpF04a6ZMFNae8USLByskN9gNWLYMRCEmEMDY6085wmOKHLyFYF0gHNYRA4gnYCrK1bRTRZzjWlgdYdms+nC6st0bCky32jHlnVF0GiQrL810FZxVBgJGoqyy3LAgz6oFU2RrZGKyK7BliCxsk3T485cazPLtI1WEiyTarhis10e6aOu/2hAD4DTRdNdqxuaJwHXPELcxfuQlKuSgV8ifKw3fx7XaeK+GLhdCPf1WkgiV/hbfd7yaqD82+ldb8P4I5FmkSfoR+fJXbDflTnEHzezGi7jT6qJAAAAAElFTkSuQmCC"
-                    />
-                  </button>
+                  <i
+                    class="bx bx-trash deleteDomainBtn text-red-500 hover:text-red-600 focus:outline-none"
+                  ></i>
                 </div>
               </li>
               <% }) %>
@@ -108,18 +97,27 @@
                 <span><%= domain.domainName %></span>
                 <div class="flex items-center space-x-3">
                   <button
+                    class="editDomainBtn text-blue-500 hover:text-blue-600 focus:outline-none"
+                    data-id="<%= domain.id %>"
+                    data-name="<%= domain.domainName %>"
+                    data-list="<%= domain.subdomain %>"
+                  ></button>
+                  <button
                     class="blockListDomainBtn px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500"
                   >
                     Move to Block List
                   </button>
-                  <!-- Thùng rác để xóa domain -->
-                  <button
-                    class="deleteDomainBtn text-red-500 hover:text-red-600 focus:outline-none"
-                  >
-                    <img
-                      src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAdBJREFUSEudVsttwzAMfcwsBQo063ScHAt0mayTAFkmLPiTSIn2oT4YgSWRfB9SIRw8BID15Rvy7/zpdCNBlqHvEsg/HCVolrc6PTFthaUPDHwD+GHgc9+oNb0IuBFwn8dqRENw8DDwAPA1l2vpApqAJ4GumQICF0KcIuErFiwQ+6kLQMFgriXWySJUqkOnM5rfW4K6m8EsoYmFwM4NIbJni4pGKY34gqvTIyMYiBzUQC0VhyjKrydwrk/UqpXQDOPcLb5mFsoNfY2aRZ5BZbMUIVqt+1sXreI1PabgwxR1/4lNoynZzUQaQ8OogoHIAhIuUKiCVY8EgtwTrV7jQE7gbpF04a6ZMFNae8USLByskN9gNWLYMRCEmEMDY6085wmOKHLyFYF0gHNYRA4gnYCrK1bRTRZzjWlgdYdms+nC6st0bCky32jHlnVF0GiQrL810FZxVBgJGoqyy3LAgz6oFU2RrZGKyK7BliCxsk3T485cazPLtI1WEiyTarhis10e6aOu/2hAD4DTRdNdqxuaJwHXPELcxfuQlKuSgV8ifKw3fx7XaeK+GLhdCPf1WkgiV/hbfd7yaqD82+ldb8P4I5FmkSfoR+fJXbDflTnEHzezGi7jT6qJAAAAAElFTkSuQmCC"
-                    />
-                  </button>
+                  <i
+                    class="bx bx-edit-alt text-blue-500 hover:text-blue-600 focus:outline-none editDomainBtn"
+                    data-id="<%= domain.id %>"
+                    data-name="<%= domain.domainName %>"
+                    data-list="<%= domain.subdomain %>"
+                    data-label="<%= domain.domainLable %>"
+                  ></i>
+
+                  <i
+                    class="bx bx-trash deleteDomainBtn text-red-500 hover:text-red-600 focus:outline-none"
+                  ></i>
                 </div>
               </li>
               <% }) %>
@@ -128,6 +126,9 @@
         </div>
       </div>
     </div>
+
+    <!-- Add Domain Modal -->
+    <%- include('./popup/model.ejs') %>
     <script src="/javascripts/blockWhiteList.js"></script>
   </body>
 </html>
