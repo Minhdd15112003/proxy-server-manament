@@ -14,7 +14,6 @@ class ProxyServer {
 
     server.on("connect", async (req, clientSocket, head) => {
       const [host, port] = req.url.split(":");
-
       const isIpBlocked = await this.blockIpClient();
       const isDomainBlocked = await this.blockDomain(host);
 
@@ -56,26 +55,52 @@ class ProxyServer {
 
     const ip = await domainModal.find({ status: true }).exec();
     let blocked = 0;
+
     for (const domain of ip) {
       for (const item of domain.domain) {
-        if (item.domainName === hostname) {
-          if (item.blockWhiteStatus === 1) {
-            // Nếu blockWhiteStatus == 1, domain bị block bất kể statusDomain
-            blocked = 1;
-            break;
-          } else if (item.blockWhiteStatus === 2) {
-            // Nếu blockWhiteStatus == 2, domain luôn được phép truy cập
-            blocked = 2;
-            break;
-          } else if (item.blockWhiteStatus === 0) {
-            blocked = 0;
-            break;
+        const ruleDomain = item.domainName; // domain trong DB, có thể là "*.facebook.com" hoặc "www.facebook.com"
+        const blockStatus = item.blockWhiteStatus;
+
+        // Kiểm tra wildcard
+        if (ruleDomain.startsWith("*.")) {
+          // Lấy phần domain sau '*.'
+          const base = ruleDomain.slice(2); // Ví dụ: "*.facebook.com" -> "facebook.com"
+
+          // Kiểm tra nếu hostname là chính domain hoặc subdomain của base
+          // hostname == 'facebook.com' hoặc hostname.endsWith('.facebook.com')
+          if (hostname === base || hostname.endsWith("." + base)) {
+            // Đã khớp wildcard
+            if (blockStatus === 1) {
+              blocked = 1; // Block
+            } else if (blockStatus === 2) {
+              blocked = 2; // Allow
+            } else {
+              blocked = 0; // Default
+            }
+            break; // Thoát vòng lặp inner
+          }
+        } else {
+          // Không phải wildcard, so sánh chính xác
+          if (hostname === ruleDomain) {
+            if (blockStatus === 1) {
+              blocked = 1; // Block
+            } else if (blockStatus === 2) {
+              blocked = 2; // Allow
+            } else {
+              blocked = 0; // Default
+            }
+            break; // Thoát vòng lặp inner
           }
         }
       }
+
+      if (blocked !== 0) {
+        // Nếu đã tìm thấy domain match với block/allow thì dừng luôn
+        break;
+      }
     }
+
     console.log(hostname);
-    // Lưu vào cache và trả kết quả
     this.domainCache.set(hostname, blocked);
     return blocked;
   }
