@@ -31,6 +31,7 @@ A robust and flexible domain management application designed to provide comprehe
 ## Prerequisites
 
 Ensure you have the following installed:
+
 - Node.js (v16.x or later)
 - MongoDB (v5.x or later)
 - npm (v8.x or later)
@@ -38,18 +39,22 @@ Ensure you have the following installed:
 ## Installation
 
 ### 1. Clone the Repository
+
 ```bash
 git clone https://github.com/yourusername/proxy-server-management.git
 cd proxy-server-management
 ```
 
 ### 2. Install Dependencies
+
 ```bash
 npm install
 ```
 
 ### 3. Configure Environment Variables
+
 Create a `.env` file in the project root:
+
 ```env
 MONGODB_URI=mongodb://localhost:27017/proxymanagement
 PORT=3000
@@ -57,6 +62,7 @@ NODE_ENV=development
 ```
 
 ### 4. Start the Application
+
 ```bash
 # Development mode
 npm run dev
@@ -77,8 +83,10 @@ npm start
 ### Domain Management
 
 #### Update Single Domain Status
-- **Endpoint:** `PATCH /updateDomain/:id`
+
+- **Endpoint:** `PATCH /updateStatusDomain/:id`
 - **Request Body:**
+
 ```json
 {
   "status": true,
@@ -87,8 +95,10 @@ npm start
 ```
 
 #### Update All Domains
+
 - **Endpoint:** `PATCH /updateAllDomains/:id`
 - **Request Body:**
+
 ```json
 {
   "status": true
@@ -96,6 +106,7 @@ npm start
 ```
 
 #### Domain Operations
+
 - `GET /findDomain/:id` - Retrieve specific domain details
 - `GET /findTrash` - List domains in trash
 - `POST /postDomain/:id` - Add new domain
@@ -137,6 +148,7 @@ proxy-server-management/
 ## Development Workflow
 
 ### Code Quality
+
 ```bash
 # Run linter
 npm run lint
@@ -167,16 +179,17 @@ npm test
 ## Contributing
 
 ### Contribution Guidelines
+
 1. Fork the repository
-2. Create a feature branch 
+2. Create a feature branch
    ```bash
    git checkout -b feature/YourFeatureName
    ```
-3. Commit changes 
+3. Commit changes
    ```bash
    git commit -m 'Add detailed description of changes'
    ```
-4. Push to branch 
+4. Push to branch
    ```bash
    git push origin feature/YourFeatureName
    ```
@@ -185,6 +198,7 @@ npm test
 ## Troubleshooting
 
 Common issues and solutions:
+
 - MongoDB connection problems
   - Verify connection string
   - Check MongoDB service status
@@ -201,7 +215,8 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ## Contact
 
-**Project Maintainer:** Minh 
+**Project Maintainer:** Minh
+
 - Email:minhtit006@gmail.com
 - GitHub: [@Minhdd15112003](https://github.com/Minhdd15112003)
 - Project Link: [[https://github.com/Minhdd15112003/proxy-server-manament](https://github.com/Minhdd15112003/proxy-server-manament)]
