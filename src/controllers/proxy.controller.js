@@ -147,16 +147,6 @@ class proxyController {
   async updateBlockDomain(req, res) {
     const { domainName, subDomainName, blockWhiteStatus, domainLable } =
       req.body;
-    // // Kiểm tra sự tồn tại của domain
-    // const existDomain = await domainModal
-    //   .findById(req.params.id)
-    //   .then((data) => {
-    //     return data.domain.filter((domain) => domain.domainName === domainName);
-    //   });
-
-    // if (existDomain.length > 0) {
-    //   return res.status(500).json({ message: "Tên miền đã tồn tại" });
-    // }
 
     await domainModal
       .updateOne(
@@ -175,12 +165,10 @@ class proxyController {
         res.json({ message: "Cập nhật tên miền thành công", data });
       })
       .catch((err) => {
-        res
-          .status(500)
-          .json({
-            message: "Cập nhật tên miền không thành công",
-            err: err.message,
-          });
+        res.status(500).json({
+          message: "Cập nhật tên miền không thành công",
+          err: err.message,
+        });
       });
   }
 

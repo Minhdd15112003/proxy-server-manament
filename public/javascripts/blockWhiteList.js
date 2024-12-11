@@ -69,34 +69,62 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (domainItem) {
       const clonedItem = domainItem.cloneNode(true);
-      const button = clonedItem.querySelector("button");
+      const moveButton = clonedItem.querySelector(
+        fromList === "blocklist" ? ".whileListDomainBtn" : ".blockListDomainBtn"
+      );
+      const editButton = clonedItem.querySelector(".editDomainBtn");
+      const deleteButton = clonedItem.querySelector(".deleteDomainBtn");
 
-      // Adjust button text and classes based on the target list
+      // Update move button
       if (toList === "blocklist") {
-        button.textContent = "Move to White List";
-        button.classList.replace("bg-red-500", "bg-green-500");
-        button.classList.replace("hover:bg-red-600", "hover:bg-green-600");
-        button.classList.replace("focus:ring-red-500", "focus:ring-green-500");
-        button.setAttribute(
-          "onclick",
-          `moveDomain('${domainId}', 'whitelist', 'blocklist')`
+        window.location.reload();
+        moveButton.textContent = "Move to White List";
+        editButton.classList.remove("hidden"); // Show edit button
+        moveButton.classList.replace("bg-red-500", "bg-green-500");
+        moveButton.classList.replace("hover:bg-red-600", "hover:bg-green-600");
+        moveButton.classList.replace(
+          "focus:ring-red-500",
+          "focus:ring-green-500"
+        );
+        moveButton.classList.replace(
+          "blockListDomainBtn",
+          "whileListDomainBtn"
         );
       } else {
-        button.textContent = "Move to Block List";
-        button.classList.replace("bg-green-500", "bg-red-500");
-        button.classList.replace("hover:bg-green-600", "hover:bg-red-600");
-        button.classList.replace("focus:ring-green-500", "focus:ring-red-500");
-        button.setAttribute(
-          "onclick",
-          `moveDomain('${domainId}', 'blocklist', 'whitelist')`
+        moveButton.textContent = "Move to Block List";
+        editButton.classList.add("hidden"); // Hide edit button
+        moveButton.classList.replace("bg-green-500", "bg-red-500");
+        moveButton.classList.replace("hover:bg-green-600", "hover:bg-red-600");
+        moveButton.classList.replace(
+          "focus:ring-green-500",
+          "focus:ring-red-500"
+        );
+        moveButton.classList.replace(
+          "whileListDomainBtn",
+          "blockListDomainBtn"
         );
       }
+
+      // Update event listeners
+      moveButton.addEventListener("click", function () {
+        moveDomain(domainId, toList, fromList);
+      });
+
+      editButton.addEventListener("click", function () {
+        const domainName = this.getAttribute("data-name");
+        const domainList = this.getAttribute("data-list");
+        openEditModal(domainId, domainName, domainList);
+      });
+
+      deleteButton.addEventListener("click", function () {
+        deleteDomain(domainId, toList === "blocklist" ? 1 : 2);
+      });
 
       // Append the new item to the target list and remove the original item
       toListElement.appendChild(clonedItem);
       domainItem.remove();
 
-      // Optionally, update the domain status via an API
+      // Update the domain status via API
       handleUpdateBlockWhiteList(domainId, toList === "blocklist" ? 1 : 2);
     }
   }
@@ -112,10 +140,10 @@ document.addEventListener("DOMContentLoaded", function () {
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log("Cập nhật trạng thái thành công", data);
+        console.log("Status updated successfully", data);
       })
       .catch((error) => {
-        console.error("Lỗi khi cập nhật trạng thái", error);
+        console.error("Error updating status", error);
       });
   }
 
@@ -127,15 +155,15 @@ document.addEventListener("DOMContentLoaded", function () {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ blockWhiteStatus: blockWhiteStatus }),
+        body: JSON.stringify({ blockWhiteStatus: 0 }),
       })
         .then((response) => response.json())
         .then((data) => {
-          window.location.reload();
-          console.log("Cập nhật trạng thái thành công", data);
+          console.log("Domain deleted successfully", data);
+          document.querySelector(`[data-id="${domainId}"]`).remove();
         })
         .catch((error) => {
-          console.error("Lỗi khi cập nhật trạng thái", error);
+          console.error("Error deleting domain", error);
         });
     }
   }
@@ -159,8 +187,8 @@ document.addEventListener("DOMContentLoaded", function () {
   document.querySelectorAll(".deleteDomainBtn").forEach((button) => {
     button.addEventListener("click", function () {
       const domainId = this.closest("li").dataset.id;
-      deleteDomain(domainId, 0);
-      window.location.reload();
+      const blockWhiteStatus = this.closest("#blocklist-items") ? 1 : 2;
+      deleteDomain(domainId, blockWhiteStatus);
     });
   });
 

@@ -66,7 +66,7 @@
                 class="px-6 py-4 whitespace-nowrap text-base text-gray-500 status"
                 id="status-<%= data._id %>"
               >
-                <%= data.status ? 'Cho phép' : 'Chặn' %>
+                <%= data.status ? 'Chặn ' : 'Cho phép' %>
               </td>
               <td
                 class="px-6 py-4 whitespace-nowrap text-base text-base font-medium"
@@ -77,7 +77,7 @@
                   data-id="<%= data._id %>"
                   data-status="<%= data.status %>"
                 >
-                  <%= data.status ? 'Chặn' : 'Cho phép' %>
+                  <%= data.status ? 'Chặn ' : 'Cho phép' %>
                 </button>
 
                 <button
@@ -101,13 +101,13 @@
 
       function updateButtonStyle(button, status) {
         if (status) {
-          button.textContent = "Chặn";
-          button.classList.remove("bg-green-500", "hover:bg-green-600");
-          button.classList.add("bg-red-500", "hover:bg-red-600");
-        } else {
           button.textContent = "Cho phép";
           button.classList.remove("bg-red-500", "hover:bg-red-600");
           button.classList.add("bg-green-500", "hover:bg-green-600");
+        } else {
+          button.textContent = "Chặn";
+          button.classList.remove("bg-green-500", "hover:bg-green-600");
+          button.classList.add("bg-red-500", "hover:bg-red-600");
         }
       }
 

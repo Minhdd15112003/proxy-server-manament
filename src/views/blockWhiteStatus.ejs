@@ -60,18 +60,12 @@
                 <span><%= domain.domainName %></span>
                 <div class="flex items-center space-x-3">
                   <button
-                    class="editDomainBtn text-blue-500 hover:text-blue-600 focus:outline-none"
-                    data-id="<%= domain.id %>"
-                    data-name="<%= domain.domainName %>"
-                    data-list="<%= domain.subdomain %>"
-                  ></button>
-                  <button
                     class="whileListDomainBtn px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
                   >
                     Move to White List
                   </button>
                   <i
-                    class="bx bx-edit-alt text-blue-500 hover:text-blue-600 focus:outline-none editDomainBtn"
+                    class="bx bx-edit-alt text-blue-500 hover:text-blue-600 focus:outline-none text-2xl editDomainBtn"
                     data-id="<%= domain.id %>"
                     data-name="<%= domain.domainName %>"
                     data-list="<%= domain.subdomain %>"
@@ -79,7 +73,7 @@
                   ></i>
 
                   <i
-                    class="bx bx-trash deleteDomainBtn text-red-500 hover:text-red-600 focus:outline-none"
+                    class="bx bx-trash deleteDomainBtn text-red-500 hover:text-red-600 focus:outline-none text-2xl"
                   ></i>
                 </div>
               </li>
@@ -108,7 +102,7 @@
                     Move to Block List
                   </button>
                   <i
-                    class="bx bx-edit-alt text-blue-500 hover:text-blue-600 focus:outline-none editDomainBtn"
+                    class="bx bx-edit-alt text-blue-500 hover:text-blue-600 focus:outline-none editDomainBtn text-2xl hidden"
                     data-id="<%= domain.id %>"
                     data-name="<%= domain.domainName %>"
                     data-list="<%= domain.subdomain %>"
@@ -116,7 +110,7 @@
                   ></i>
 
                   <i
-                    class="bx bx-trash deleteDomainBtn text-red-500 hover:text-red-600 focus:outline-none"
+                    class="bx bx-trash deleteDomainBtn text-red-500 hover:text-red-600 focus:outline-none text-2xl"
                   ></i>
                 </div>
               </li>

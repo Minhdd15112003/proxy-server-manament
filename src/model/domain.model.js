@@ -5,7 +5,7 @@ var mongoose = require("mongoose");
 // });
 const domainSchema = mongoose.Schema({
   domainLable: { type: String, required: false },
-  domainName: { type: String, required: true },
+  domainName: { type: String, required: false },
   subdomain: [{ type: String }],
   // statusDomain: { type: Boolean, default: false },
   blockWhiteStatus: { type: Number, default: 0 },
