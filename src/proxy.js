@@ -2,6 +2,7 @@ const http = require("http");
 const tldjs = require("tldjs");
 const net = require("net");
 const domainModal = require("./model/domain.model");
+const chalk = require("chalk");
 
 class ProxyServer {
   constructor() {
@@ -15,12 +16,15 @@ class ProxyServer {
     server.on("connect", async (req, clientSocket, head) => {
       const [host, port] = req.url.split(":");
       const isIpBlocked = await this.blockIpClient();
-      const isDomainBlocked = await this.blockDomain(host);
-
+      const baseDomain = tldjs.getDomain(host);
+      const isDomainBlocked = await this.blockDomain(baseDomain);
+      console.log("host", host, isDomainBlocked);
       // Nếu IP hoặc domain bị block, trả về lỗi 403
-      if (isIpBlocked === false || isDomainBlocked === 1) {
-        console.log("isDomainBlocked", isDomainBlocked, "domain ", host);
-        console.log("Access to this website is blocked.");
+      if (isIpBlocked === true || isDomainBlocked === 1) {
+        console.log(
+          chalk.red("isDomainBlocked", isDomainBlocked, "domain ", host)
+        );
+        console.log(chalk.bgRed("Access to this website is blocked."));
         clientSocket.write(
           "HTTPS/1.1 403 Forbidden\r\n" +
             "Content-Type: text/plain\r\n\r\n" +
@@ -53,18 +57,16 @@ class ProxyServer {
       return this.domainCache.get(hostname);
     }
 
-    const ip = await domainModal.find({ status: true }).exec();
+    const ip = await domainModal.find({ status: false }).exec();
     let blocked = 0;
 
     for (const domain of ip) {
       for (const item of domain.domain) {
         if (item.domainName === hostname) {
           if (item.blockWhiteStatus === 1) {
-            // Nếu blockWhiteStatus == 1, domain bị block bất kể statusDomain
             blocked = 1;
             break;
           } else if (item.blockWhiteStatus === 2) {
-            // Nếu blockWhiteStatus == 2, domain luôn được phép truy cập
             blocked = 2;
             break;
           } else if (item.blockWhiteStatus === 0) {
@@ -74,7 +76,6 @@ class ProxyServer {
         }
       }
 
-      console.log(hostname);
       this.domainCache.set(hostname, blocked);
       return blocked;
     }

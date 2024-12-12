@@ -16,5 +16,5 @@ var UserSchema = mongoose.Schema({
   status: { type: Boolean, default: false },
 });
 
-const domainModal = mongoose.model("ip-server", UserSchema);
+const domainModal = mongoose.model("ips", UserSchema);
 module.exports = domainModal;

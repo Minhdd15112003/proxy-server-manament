@@ -6,7 +6,7 @@ var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 var mongoose = require("mongoose");
 const { ProxyServer } = require("./proxy");
-var domainModal = require("./model/domain.model");
+
 const routes = require("./routes");
 
 var app = express();
@@ -26,15 +26,23 @@ app.use(express.static(path.join(__dirname, "../public")));
 
 routes(app);
 
-// Kết nối MongoDB
-mongoose
-  .connect("mongodb://localhost:27017/proxy-server")
-  .then(() => {
-    console.log("Connected to MongoDB");
-  })
-  .catch((err) => {
-    console.log("Error connecting to MongoDB:", err);
-  });
+mongoose.connect(
+  "mongodb+srv://minhdd15112003:minhtit123@nodejs.9l9gg.mongodb.net/proxy-server",
+  {
+    maxPoolSize: 10, // Số kết nối tối đa trong connection pool
+    socketTimeoutMS: 45000, // Timeout socket
+    family: 4, // Sử dụng IPv4
+  }
+);
+
+// Add connection event listeners
+mongoose.connection.on("connected", () => {
+  console.log("Mongoose connected to MongoDB");
+});
+
+mongoose.connection.on("error", (err) => {
+  console.error("Mongoose connection error:", err);
+});
 
 // Lắng nghe trên cổng 3000
 server.listen(3000);
