@@ -3,11 +3,14 @@ const tldjs = require("tldjs");
 const net = require("net");
 const domainModal = require("./model/domain.model");
 const chalk = require("chalk");
+const { default: Redis } = require("ioredis");
 
 class ProxyServer {
   constructor() {
-    // Bộ nhớ cache cho các tên miền đã kiểm tra
-    this.domainCache = new Map();
+    this.redisClient = new Redis({
+      host: "localhost", // Địa chỉ Redis server
+      port: 6379, // Cổng mặc định của Redis
+    });
   }
 
   async start(port = 9090) {
@@ -47,14 +50,27 @@ class ProxyServer {
   }
 
   async blockIpClient() {
+    const caheKey = "blocked_ips";
+    const cacheResult = await this.redisClient.get(caheKey);
+    if (cacheResult) {
+      return JSON.parse(cacheResult);
+    }
+
     const ip = await domainModal.find({ status: false }).exec();
     const ipClient = ip.map((item) => item.status);
+
+    await this.redisClient.set(
+      caheKey,
+      JSON.stringify(ipClient[0], "EX", 3600)
+    );
     return ipClient[0];
   }
 
   async blockDomain(hostname) {
-    if (this.domainCache.has(hostname)) {
-      return this.domainCache.get(hostname);
+    const cacheKey = `domain_block${hostname}`;
+    const cacheResult = await this.redisClient.get(cacheKey);
+    if (cacheResult) {
+      return JSON.parse(cacheResult);
     }
 
     const ip = await domainModal.find({ status: false }).exec();
@@ -74,9 +90,10 @@ class ProxyServer {
             break;
           }
         }
+        await this.redisClient.set(cacheKey, blocked, "EX", 3600);
+        return blocked;
       }
 
-      this.domainCache.set(hostname, blocked);
       return blocked;
     }
   }
@@ -87,31 +104,59 @@ class ProxyServer {
         req.connection.remoteAddress || req.socket.remoteAddress
       ).slice(7);
       const baseDomain = tldjs.getDomain(hostname);
-      const existClient = await domainModal.findOne({ ip: clientIp });
 
-      if (!existClient) {
-        await domainModal.create({
-          ip: clientIp,
-          status: true,
-          domain: [{ domainName: baseDomain, statusDomain: true }],
-        });
-        console.log("Saving new client:", clientIp, "with domain:", hostname);
-      } else {
-        const domainExists = existClient.domain.some(
-          (d) => d.domainName === baseDomain
-        );
-        if (!domainExists) {
-          existClient.domain.push({
-            domainName: baseDomain,
-            statusDomain: true,
+      // Sử dụng Redis để giảm tải cho database
+      const cacheKey = `client:${clientIp}`;
+
+      // Kiểm tra trong cache trước
+      const cachedClient = await this.redisClient.get(cacheKey);
+
+      if (!cachedClient) {
+        const existClient = await domainModal.findOne({ ip: clientIp });
+
+        if (!existClient) {
+          const newClient = await domainModal.create({
+            ip: clientIp,
+
+            domain: [{ domainName: baseDomain }],
           });
-          await existClient.save();
-          console.log(
-            "Updating existing client:",
-            clientIp,
-            "with domain:",
-            hostname
+
+          // Lưu vào cache
+          await this.redisClient.set(
+            cacheKey,
+            JSON.stringify(newClient),
+            "EX",
+            86400
+          ); // 24 giờ
+
+          console.log("Saving new client:", clientIp, "with domain:", hostname);
+        } else {
+          const domainExists = existClient.domain.some(
+            (d) => d.domainName === baseDomain
           );
+
+          if (!domainExists) {
+            existClient.domain.push({
+              domainName: baseDomain,
+              statusDomain: true,
+            });
+            await existClient.save();
+
+            // Cập nhật cache
+            await this.redisClient.set(
+              cacheKey,
+              JSON.stringify(existClient),
+              "EX",
+              86400
+            );
+
+            console.log(
+              "Updating existing client:",
+              clientIp,
+              "with domain:",
+              hostname
+            );
+          }
         }
       }
     } catch (error) {
@@ -152,6 +197,10 @@ class ProxyServer {
       console.log("Server socket closed");
       clientSocket.end();
     });
+  }
+  async close() {
+    // Đóng kết nối Redis khi không sử dụng
+    await this.redisClient.quit();
   }
 }
 

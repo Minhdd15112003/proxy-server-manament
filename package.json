@@ -13,6 +13,7 @@
     "express": "~4.16.1",
     "http-errors": "~1.6.3",
     "http-mitm-proxy": "^1.1.0",
+    "ioredis": "^5.4.1",
     "mongo": "^0.1.0",
     "mongoose": "^8.8.2",
     "morgan": "~1.9.1",
