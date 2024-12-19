@@ -20,12 +20,12 @@ class ProxyServer {
       const clientIp = (
         req.connection.remoteAddress || req.socket.remoteAddress
       ).slice(7);
-      console.log("clientIp", clientIp);
+
       const [host, port] = req.url.split(":");
       const isIpBlocked = await this.blockIpClient(clientIp);
       const baseDomain = tldjs.getDomain(host);
       const isDomainBlocked = await this.blockDomain(baseDomain, clientIp);
-      console.log("host", host, isDomainBlocked);
+      console.log("host", baseDomain, isDomainBlocked);
       // Nếu IP hoặc domain bị block, trả về lỗi 403
       if (isIpBlocked === true || isDomainBlocked === 1) {
         console.log(
@@ -41,10 +41,10 @@ class ProxyServer {
         clientSocket.end();
       } else if (isDomainBlocked === 2) {
         this.handleHttpsRequest(req, clientSocket, head, host, port);
-        await this.saveDomain(host, req, clientIp);
+        await this.saveDomain(baseDomain, clientIp);
       } else {
         this.handleHttpsRequest(req, clientSocket, head, host, port);
-        await this.saveDomain(host, req, clientIp);
+        await this.saveDomain(baseDomain, clientIp);
       }
     });
 
@@ -102,62 +102,54 @@ class ProxyServer {
     }
   }
 
-  async saveDomain(hostname, req, ip) {
+  async saveDomain(hostname, ip) {
     try {
-      const baseDomain = tldjs.getDomain(hostname);
-
       // Sử dụng Redis để giảm tải cho database
       const cacheKey = `client:${ip}`;
 
-      // Kiểm tra trong cache trước
-      const cachedClient = await this.redisClient.get(cacheKey);
+      const existClient = await domainModal.findOne({ ip }).exec();
 
-      if (!cachedClient) {
-        const existClient = await domainModal.findOne({ ip }).exec();
+      if (!existClient || existClient.ip !== ip) {
+        const newClient = await domainModal.create({
+          ip,
+          domain: [{ domainName: hostname }],
+        });
 
-        if (!existClient) {
-          const newClient = await domainModal.create({
-            ip,
+        // Lưu vào cache
+        await this.redisClient.set(
+          cacheKey,
+          JSON.stringify(newClient),
+          "EX",
+          86400
+        ); // 24 giờ
 
-            domain: [{ domainName: baseDomain }],
+        console.log("Saving new client:", ip, "with domain:", hostname);
+      } else {
+        const domainExists = existClient.domain.some(
+          (d) => d.domainName === hostname
+        );
+
+        if (!domainExists) {
+          existClient.domain.push({
+            domainName: hostname,
+            statusDomain: true,
           });
+          await existClient.save();
 
-          // Lưu vào cache
+          // Cập nhật cache
           await this.redisClient.set(
             cacheKey,
-            JSON.stringify(newClient),
+            JSON.stringify(existClient),
             "EX",
             86400
-          ); // 24 giờ
-
-          console.log("Saving new client:", ip, "with domain:", hostname);
-        } else {
-          const domainExists = existClient.domain.some(
-            (d) => d.domainName === baseDomain
           );
 
-          if (!domainExists) {
-            existClient.domain.push({
-              domainName: baseDomain,
-              statusDomain: true,
-            });
-            await existClient.save();
-
-            // Cập nhật cache
-            await this.redisClient.set(
-              cacheKey,
-              JSON.stringify(existClient),
-              "EX",
-              86400
-            );
-
-            console.log(
-              "Updating existing client:",
-              ip,
-              "with domain:",
-              hostname
-            );
-          }
+          console.log(
+            "Updating existing client:",
+            ip,
+            "with domain:",
+            hostname
+          );
         }
       }
     } catch (error) {
