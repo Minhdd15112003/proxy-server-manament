@@ -25,7 +25,7 @@ class ProxyServer {
       const isIpBlocked = await this.blockIpClient(clientIp);
       const baseDomain = tldjs.getDomain(host);
       const isDomainBlocked = await this.blockDomain(baseDomain, clientIp);
-      console.log("host", host, isDomainBlocked);
+      console.log("host", baseDomain, isDomainBlocked);
       // Nếu IP hoặc domain bị block, trả về lỗi 403
       if (isDomainBlocked === 1 || isIpBlocked === true) {
         console.log(
@@ -108,6 +108,7 @@ class ProxyServer {
   }
 
   async saveDomain(hostname, clientIp) {
+    const baseDomain = tldjs.getDomain(hostname);
     try {
       const cacheKey = `client_${clientIp}`;
       const cachedClient = await this.redisClient.get(cacheKey);
@@ -118,14 +119,14 @@ class ProxyServer {
       if (!clientData) {
         clientData = await domainModal.create({
           ip: clientIp,
-          domain: [{ domainName: hostname }],
+          domain: [{ domainName: baseDomain }],
         });
       } else {
         const domainExists = clientData.domain.some(
-          (d) => d.domainName === hostname
+          (d) => d.domainName === baseDomain
         );
         if (!domainExists) {
-          clientData.domain.push({ domainName: hostname });
+          clientData.domain.push({ domainName: baseDomain });
           await clientData.save();
         }
       }
@@ -136,7 +137,7 @@ class ProxyServer {
         "EX",
         86400
       );
-      console.log("Domain saved for client:", clientIp, hostname);
+      console.log("Domain saved for client:", clientIp, baseDomain);
     } catch (error) {
       console.error("Error saving domain:", error);
     }
