@@ -17,10 +17,14 @@ class ProxyServer {
     const server = http.createServer((req, res) => {});
 
     server.on("connect", async (req, clientSocket, head) => {
+      const clientIp = (
+        req.connection.remoteAddress || req.socket.remoteAddress
+      ).slice(7);
+
       const [host, port] = req.url.split(":");
       const isIpBlocked = await this.blockIpClient();
       const baseDomain = tldjs.getDomain(host);
-      const isDomainBlocked = await this.blockDomain(baseDomain);
+      const isDomainBlocked = await this.blockDomain(baseDomain, clientIp);
       console.log("host", host, isDomainBlocked);
       // Nếu IP hoặc domain bị block, trả về lỗi 403
       if (isIpBlocked === true || isDomainBlocked === 1) {
@@ -40,7 +44,7 @@ class ProxyServer {
         await this.saveDomain(host, req);
       } else {
         this.handleHttpsRequest(req, clientSocket, head, host, port);
-        await this.saveDomain(host, req);
+        await this.saveDomain(host, req, clientIp);
       }
     });
 
@@ -66,14 +70,14 @@ class ProxyServer {
     return ipClient[0];
   }
 
-  async blockDomain(hostname) {
+  async blockDomain(hostname, clientIp) {
     const cacheKey = `domain_block${hostname}`;
     const cacheResult = await this.redisClient.get(cacheKey);
     if (cacheResult) {
       return JSON.parse(cacheResult);
     }
 
-    const ip = await domainModal.find({ status: false }).exec();
+    const ip = await domainModal.findById(clientIp, { status: false }).exec();
     let blocked = 0;
 
     for (const domain of ip) {
@@ -98,11 +102,8 @@ class ProxyServer {
     }
   }
 
-  async saveDomain(hostname, req) {
+  async saveDomain(hostname, req, ip) {
     try {
-      const clientIp = (
-        req.connection.remoteAddress || req.socket.remoteAddress
-      ).slice(7);
       const baseDomain = tldjs.getDomain(hostname);
 
       // Sử dụng Redis để giảm tải cho database
