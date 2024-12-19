@@ -20,9 +20,9 @@ class ProxyServer {
       const clientIp = (
         req.connection.remoteAddress || req.socket.remoteAddress
       ).slice(7);
-
+      console.log("clientIp", clientIp);
       const [host, port] = req.url.split(":");
-      const isIpBlocked = await this.blockIpClient();
+      const isIpBlocked = await this.blockIpClient(clientIp);
       const baseDomain = tldjs.getDomain(host);
       const isDomainBlocked = await this.blockDomain(baseDomain, clientIp);
       console.log("host", host, isDomainBlocked);
@@ -41,7 +41,7 @@ class ProxyServer {
         clientSocket.end();
       } else if (isDomainBlocked === 2) {
         this.handleHttpsRequest(req, clientSocket, head, host, port);
-        await this.saveDomain(host, req);
+        await this.saveDomain(host, req, clientIp);
       } else {
         this.handleHttpsRequest(req, clientSocket, head, host, port);
         await this.saveDomain(host, req, clientIp);
@@ -53,14 +53,17 @@ class ProxyServer {
     });
   }
 
-  async blockIpClient() {
+  async blockIpClient(id) {
     const caheKey = "blocked_ips";
     const cacheResult = await this.redisClient.get(caheKey);
     if (cacheResult) {
       return JSON.parse(cacheResult);
     }
 
-    const ip = await domainModal.find({ status: false }).exec();
+    const ip = await domainModal
+      .findOne({ id: clientIp, status: false })
+      .exec();
+
     const ipClient = ip.map((item) => item.status);
 
     await this.redisClient.set(
@@ -71,34 +74,31 @@ class ProxyServer {
   }
 
   async blockDomain(hostname, clientIp) {
-    const cacheKey = `domain_block${hostname}`;
-    const cacheResult = await this.redisClient.get(cacheKey);
-    if (cacheResult) {
-      return JSON.parse(cacheResult);
-    }
+    try {
+      const cacheKey = `domain_block${hostname}`;
+      const cacheResult = await this.redisClient.get(cacheKey);
+      if (cacheResult) {
+        return JSON.parse(cacheResult);
+      }
 
-    const ip = await domainModal.findById(clientIp, { status: false }).exec();
-    let blocked = 0;
+      const ip = await domainModal
+        .findOne({ ip: clientIp, status: false })
+        .exec();
+      let blocked = 0;
 
-    for (const domain of ip) {
-      for (const item of domain.domain) {
-        if (item.domainName === hostname) {
-          if (item.blockWhiteStatus === 1) {
-            blocked = 1;
-            break;
-          } else if (item.blockWhiteStatus === 2) {
-            blocked = 2;
-            break;
-          } else if (item.blockWhiteStatus === 0) {
-            blocked = 0;
+      if (ip) {
+        for (const item of ip.domain) {
+          if (item.domainName === hostname) {
+            blocked = item.blockWhiteStatus;
             break;
           }
         }
         await this.redisClient.set(cacheKey, blocked, "EX", 3600);
-        return blocked;
       }
-
       return blocked;
+    } catch (error) {
+      console.error("Error in blockDomain:", error);
+      return 0; // Không block nếu có lỗi
     }
   }
 
@@ -107,17 +107,17 @@ class ProxyServer {
       const baseDomain = tldjs.getDomain(hostname);
 
       // Sử dụng Redis để giảm tải cho database
-      const cacheKey = `client:${clientIp}`;
+      const cacheKey = `client:${ip}`;
 
       // Kiểm tra trong cache trước
       const cachedClient = await this.redisClient.get(cacheKey);
 
       if (!cachedClient) {
-        const existClient = await domainModal.findOne({ ip: clientIp });
+        const existClient = await domainModal.findOne({ ip }).exec();
 
         if (!existClient) {
           const newClient = await domainModal.create({
-            ip: clientIp,
+            ip,
 
             domain: [{ domainName: baseDomain }],
           });
@@ -130,7 +130,7 @@ class ProxyServer {
             86400
           ); // 24 giờ
 
-          console.log("Saving new client:", clientIp, "with domain:", hostname);
+          console.log("Saving new client:", ip, "with domain:", hostname);
         } else {
           const domainExists = existClient.domain.some(
             (d) => d.domainName === baseDomain
@@ -153,7 +153,7 @@ class ProxyServer {
 
             console.log(
               "Updating existing client:",
-              clientIp,
+              ip,
               "with domain:",
               hostname
             );
