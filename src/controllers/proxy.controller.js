@@ -56,7 +56,7 @@ class proxyController {
         id,
         {
           $set: {
-            "domain.$[].statusDomain": status,
+            "domain.$[].blockWhiteStatus": status,
           },
         },
         { new: true }
@@ -213,7 +213,7 @@ class proxyController {
   }
 
   async updateStatusDomain(req, res) {
-    // const newStatus = req.body.status;
+    const newStatus = req.body.status;
     const newTrash = req.body.blockWhiteStatus;
 
     await domainModal
@@ -221,7 +221,7 @@ class proxyController {
         { "domain._id": req.params.id },
         {
           $set: {
-            // "domain.$.statusDomain": newStatus,
+            "domain.$.statusDomain": newStatus,
             "domain.$.blockWhiteStatus": newTrash,
           },
         },
