@@ -3,16 +3,8 @@ const tldjs = require("tldjs");
 const net = require("net");
 const domainModal = require("./model/domain.model");
 const chalk = require("chalk");
-const { default: Redis } = require("ioredis");
 
 class ProxyServer {
-  constructor() {
-    this.redisClient = new Redis({
-      host: "localhost", // Địa chỉ Redis server
-      port: 6379, // Cổng mặc định của Redis
-    });
-  }
-
   async start(port = 9090) {
     const server = http.createServer((req, res) => {});
 
@@ -51,50 +43,29 @@ class ProxyServer {
   }
 
   async blockIpClient(clientIp) {
-    const cacheKey = `blocked_ips_${clientIp}`;
-    const cacheResult = await this.redisClient.get(cacheKey);
-    if (cacheResult) {
-      return JSON.parse(cacheResult);
-    }
-
     try {
       const ip = await domainModal.findOne({ ip: clientIp }).exec();
       if (ip && ip.status === true) {
-        await this.redisClient.set(cacheKey, JSON.stringify(true), "EX", 3600);
         return true;
       }
     } catch (error) {
       console.error("Error in blockIpClient:", error);
     }
 
-    await this.redisClient.set(cacheKey, JSON.stringify(false), "EX", 3600);
     return false;
   }
 
   async blockDomain(hostname, clientIp) {
-    const cacheKey = `domain_block_${hostname}_${clientIp}`;
-    const cacheResult = await this.redisClient.get(cacheKey);
-    if (cacheResult) {
-      return JSON.parse(cacheResult);
-    }
-
     try {
       const ipData = await domainModal.findOne({ ip: clientIp }).exec();
       if (ipData && ipData.status === true) {
         // Nếu status là true, chặn tất cả domain
-        await this.redisClient.set(cacheKey, JSON.stringify(1), "EX", 3600);
         return 1;
       }
 
       if (ipData && ipData.domain) {
         for (const item of ipData.domain) {
           if (item.domainName === hostname) {
-            await this.redisClient.set(
-              cacheKey,
-              JSON.stringify(item.blockWhiteStatus),
-              "EX",
-              3600
-            );
             return item.blockWhiteStatus;
           }
         }
@@ -103,40 +74,30 @@ class ProxyServer {
       console.error("Error in blockDomain:", error);
     }
 
-    await this.redisClient.set(cacheKey, JSON.stringify(0), "EX", 3600);
     return 0; // Mặc định không bị block
   }
 
   async saveDomain(hostname, clientIp) {
     const baseDomain = tldjs.getDomain(hostname);
     try {
-      const cacheKey = `client_${clientIp}`;
-      const cachedClient = await this.redisClient.get(cacheKey);
-      if (cachedClient) return;
+      // Check if a single entry exists for the given IP, otherwise create only one
+      let clientData = await domainModal
+        .findOneAndUpdate(
+          { ip: clientIp },
+          { $setOnInsert: { ip: clientIp, domain: [] } },
+          { upsert: true, new: true }
+        )
+        .exec();
 
-      let clientData = await domainModal.findOne({ ip: clientIp }).exec();
-
-      if (!clientData) {
-        clientData = await domainModal.create({
-          ip: clientIp,
-          domain: [{ domainName: baseDomain }],
-        });
-      } else {
-        const domainExists = clientData.domain.some(
-          (d) => d.domainName === baseDomain
-        );
-        if (!domainExists) {
-          clientData.domain.push({ domainName: baseDomain });
-          await clientData.save();
-        }
+      // Ensure the domain is not duplicated
+      const domainExists = clientData.domain.some(
+        (d) => d.domainName === baseDomain
+      );
+      if (!domainExists) {
+        clientData.domain.push({ domainName: baseDomain });
+        await clientData.save();
       }
 
-      await this.redisClient.set(
-        cacheKey,
-        JSON.stringify(clientData),
-        "EX",
-        86400
-      );
       console.log("Domain saved for client:", clientIp, baseDomain);
     } catch (error) {
       console.error("Error saving domain:", error);
@@ -175,10 +136,6 @@ class ProxyServer {
       console.log("Server socket closed");
       clientSocket.end();
     });
-  }
-
-  async close() {
-    await this.redisClient.quit();
   }
 }
 
